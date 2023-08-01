@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import styles from "./page.module.scss";
-import Dot from "./components/Dot";
 import Controllers from "./components/Controllers";
 import Grid from "./components/Grid";
 
@@ -110,12 +109,22 @@ export default function Home() {
   };
 
   const generateListeners = (e) => {
-    if (e.key === "d") {
+    if (e.key === "q") {
       deleteDot();
-    } else if (e.key === "e") {
+    } else if (e.key === "r") {
       rotateDot(-1);
-    } else if (e.key === "q") {
+    } else if (e.key === "w") {
       rotateDot(1);
+    } else if (e.key === "e") {
+      setTemplateTile(undefined);
+    } else if (e.key === "1") {
+      setTemplateTile(1);
+    } else if (e.key === "2") {
+      setTemplateTile(2);
+    } else if (e.key === "3") {
+      setTemplateTile(3);
+    } else if (e.key === "4") {
+      setTemplateTile(4);
     }
   };
 
@@ -129,12 +138,21 @@ export default function Home() {
   return (
     <main className={styles.main}>
       <h1>Lego Dots Playground</h1>
-      <p>Select the Dot you want to place and click on the board to place it</p>
       <p>
-        Use the Q and E keys to rotate the selected position (highlighted in
-        red)
+        <b>Select the Dot</b> you want to place and{" "}
+        <b>click on the board to place it.</b>
       </p>
-      <p>Use the D key to remove the Dot in the selected position</p>
+      <em>
+        Tip: Fast select the Dot using 1, 2, 3 and 4 in your keyboard, of E for
+        the hand.
+      </em>
+      <p>
+        Use the <b>W and R keys to rotate</b> the selected position (highlighted
+        in red)
+      </p>
+      <p>
+        Use the <b>Q key to remove</b> the Dot in the selected position
+      </p>
       <Controllers
         templateTile={templateTile}
         setTemplateTile={setTemplateTile}
