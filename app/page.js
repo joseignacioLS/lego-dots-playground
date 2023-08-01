@@ -160,6 +160,8 @@ export default function Home() {
         handleSizeChange={handleSizeChange}
         color={color}
         setColor={setColor}
+        rotateDot={rotateDot}
+        deleteDot={deleteDot}
       />
       <Grid
         grid={grid}

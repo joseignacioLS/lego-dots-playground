@@ -9,6 +9,8 @@ const Controllers = ({
   handleSizeChange,
   color,
   setColor,
+  rotateDot,
+  deleteDot,
 }) => {
   return (
     <section className={styles.controls}>
@@ -52,6 +54,8 @@ const Controllers = ({
           value={color}
           onInput={(e) => setColor(e.currentTarget.value)}
         />
+        <button onClick={() => rotateDot(-1)}>Rotate</button>
+        <button onClick={deleteDot}>Delete</button>
       </div>
     </section>
   );
