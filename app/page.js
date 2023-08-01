@@ -1,95 +1,162 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+"use client";
+
+import { useEffect, useState } from "react";
+import styles from "./page.module.scss";
+import Dot from "./components/Dot";
+import Controllers from "./components/Controllers";
+import Grid from "./components/Grid";
+
+const generateGrid = (value) => {
+  return [...new Array(value)].map((_) => {
+    return [...new Array(value)].map((_) => [0, 0]);
+  });
+};
+
+const initialValue = generateGrid(8);
 
 export default function Home() {
+  const [size, setSize] = useState(8);
+  const [color, setColor] = useState("#000000");
+  const [grid, setGrid] = useState(initialValue);
+  const [templateTile, setTemplateTile] = useState(undefined);
+  const [selectedCell, setSelectedCell] = useState([undefined, undefined]);
+
+  const onClick = (e, position) => {
+    e.preventDefault();
+    setGrid((oldState) => {
+      return oldState.map((row, y) => {
+        if (y !== position[0]) return row;
+        return row.map((cell, x) => {
+          if (x !== position[1]) return cell;
+          setSelectedCell([y, x]);
+          if (templateTile === undefined) return cell;
+          cell[0] = templateTile;
+          return cell;
+        });
+      });
+    });
+  };
+
+  const deleteDot = () => {
+    setGrid((oldState) => {
+      return oldState.map((row, y) => {
+        if (y !== selectedCell[0]) return row;
+        return row.map((cell, x) => {
+          if (x !== selectedCell[1]) return cell;
+          setSelectedCell([undefined, undefined]);
+          cell[0] = 0;
+          cell[1] = 0;
+          return cell;
+        });
+      });
+    });
+  };
+
+  const rotateDot = (dir = 1) => {
+    setGrid((oldState) => {
+      return oldState.map((row, y) => {
+        if (y !== selectedCell[0]) return row;
+        return row.map((cell, x) => {
+          if (x !== selectedCell[1]) return cell;
+          cell[1] += dir;
+          if (cell[1] > 3) cell[1] = 0;
+          if (cell[1] < 0) cell[1] = 3;
+          return cell;
+        });
+      });
+    });
+  };
+
+  const loadGrid = () => {
+    const fileInput = document.querySelector("#file");
+    const file = fileInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const fileContents = e.target.result;
+      try {
+        const parsed = JSON.parse(fileContents);
+        if (!Array.isArray(parsed)) return;
+        if (parsed.length !== parsed[0].length) return;
+        if (parsed[0][0].length !== 2) return;
+        setSize(parsed.length);
+        setGrid(parsed);
+        setSelectedCell([undefined, undefined]);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const exportGrid = () => {
+    const filename = "design.json";
+    const data = JSON.stringify(grid);
+    let element = document.createElement("a");
+    element.setAttribute(
+      "href",
+      "data:text/plain;charset=utf-8," + encodeURIComponent(data)
+    );
+    element.setAttribute("download", filename);
+    element.style.display = "none";
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+
+  const handleSizeChange = (value) => {
+    setSize(value);
+    setGrid(generateGrid(value));
+  };
+
+  const generateListeners = (e) => {
+    if (e.key === "d") {
+      deleteDot();
+    } else if (e.key === "e") {
+      rotateDot(-1);
+    } else if (e.key === "q") {
+      rotateDot(1);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("keydown", generateListeners);
+    return () => {
+      document.removeEventListener("keydown", generateListeners);
+    };
+  }, [selectedCell]);
+
   return (
     <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
+      <h1>Lego Dots Playground</h1>
+      <p>Select the Dot you want to place and click on the board to place it</p>
+      <p>
+        Use the Q and E keys to rotate the selected position (highlighted in
+        red)
+      </p>
+      <p>Use the D key to remove the Dot in the selected position</p>
+      <Controllers
+        templateTile={templateTile}
+        setTemplateTile={setTemplateTile}
+        size={size}
+        handleSizeChange={handleSizeChange}
+        color={color}
+        setColor={setColor}
+      />
+      <Grid
+        grid={grid}
+        selectedCell={selectedCell}
+        color={color}
+        onClick={onClick}
+      />
+      <h2>Export and Load designs</h2>
+      <div>
+        <input id="file" type="file" onLoad={(e) => console.log(e)}></input>
+        <button onClick={loadGrid}>Load</button>
       </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
+      <div>
+        <button onClick={exportGrid}>Export</button>
       </div>
     </main>
-  )
+  );
 }
