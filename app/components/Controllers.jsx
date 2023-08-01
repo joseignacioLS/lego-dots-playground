@@ -7,6 +7,8 @@ const Controllers = ({
   setTemplateTile,
   size,
   handleSizeChange,
+  dotSize,
+  handleDotSizeChange,
   color,
   setColor,
   rotateDot,
@@ -15,7 +17,7 @@ const Controllers = ({
   return (
     <section className={styles.controls}>
       <label>
-        Size: {size}
+        Size:
         <input
           type="range"
           value={size}
@@ -24,6 +26,19 @@ const Controllers = ({
           step={4}
           onChange={(e) => handleSizeChange(+e.currentTarget.value)}
         />
+        {size}
+      </label>
+      <label>
+        Dot Size:
+        <input
+          type="range"
+          value={dotSize}
+          min={0.5}
+          max={5}
+          step={0.5}
+          onChange={(e) => handleDotSizeChange(+e.currentTarget.value)}
+        />
+        {dotSize}
       </label>
       <div className={styles.templateTiles}>
         <div
@@ -48,7 +63,7 @@ const Controllers = ({
           );
         })}
       </div>
-      <div>
+      <div className={styles.actions}>
         <input
           type="color"
           value={color}

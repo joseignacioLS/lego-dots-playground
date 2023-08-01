@@ -2,7 +2,7 @@ import React from "react";
 import styles from "./Grid.module.scss";
 import Dot from "./Dot";
 
-const Grid = ({ grid, selectedCell, color, onClick }) => {
+const Grid = ({ grid, selectedCell, color, onClick, dotSize }) => {
   return (
     <section className={styles.grid}>
       {grid.map((row, i) => {
@@ -17,6 +17,9 @@ const Grid = ({ grid, selectedCell, color, onClick }) => {
                     selectedCell[1] === j &&
                     styles.cellSelected
                   }`}
+                  style={{
+                    width: dotSize + "rem",
+                  }}
                   onClick={(e) => {
                     onClick(e, [i, j]);
                   }}

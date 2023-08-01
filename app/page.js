@@ -15,6 +15,7 @@ const initialValue = generateGrid(8);
 
 export default function Home() {
   const [size, setSize] = useState(8);
+  const [dotSize, setDotSize] = useState(2);
   const [color, setColor] = useState("#000000");
   const [grid, setGrid] = useState(initialValue);
   const [templateTile, setTemplateTile] = useState(undefined);
@@ -108,6 +109,11 @@ export default function Home() {
     setGrid(generateGrid(value));
   };
 
+  const handleDotSizeChange = (value) => {
+    setDotSize(value);
+  };
+
+
   const generateListeners = (e) => {
     if (e.key === "q") {
       deleteDot();
@@ -158,6 +164,8 @@ export default function Home() {
         setTemplateTile={setTemplateTile}
         size={size}
         handleSizeChange={handleSizeChange}
+        dotSize={dotSize}
+        handleDotSizeChange={handleDotSizeChange}
         color={color}
         setColor={setColor}
         rotateDot={rotateDot}
@@ -168,6 +176,7 @@ export default function Home() {
         selectedCell={selectedCell}
         color={color}
         onClick={onClick}
+        dotSize={dotSize}
       />
       <h2>Export and Load designs</h2>
       <div>
