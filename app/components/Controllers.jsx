@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useContext } from "react";
 import styles from "./Controllers.module.scss";
 import Dot from "./Dot";
+import { ModalContext } from "../context/modal";
 
 const Controllers = ({
   templateTile,
@@ -13,64 +14,88 @@ const Controllers = ({
   setColor,
   rotateDot,
   deleteDot,
+  loadGrid,
+  exportGrid,
 }) => {
+  const { openModal } = useContext(ModalContext);
   return (
     <section className={styles.controls}>
-      <label>
-        Size:
-        <input
-          type="range"
-          value={size}
-          min={4}
-          max={32}
-          step={4}
-          onChange={(e) => handleSizeChange(+e.currentTarget.value)}
-        />
-        {size}
-      </label>
-      <label>
-        Dot Size:
-        <input
-          type="range"
-          value={dotSize}
-          min={0.5}
-          max={5}
-          step={0.5}
-          onChange={(e) => handleDotSizeChange(+e.currentTarget.value)}
-        />
-        {dotSize}
-      </label>
-      <div className={styles.templateTiles}>
-        <div
-          className={`${styles.cell} ${
-            templateTile === undefined && styles.cellSelected
-          }`}
-          onClick={() => setTemplateTile(undefined)}
-        >
-          👆
+      <div className={styles.managing}>
+        <label>
+          Board Size:
+          <input
+            type="range"
+            value={size}
+            min={4}
+            max={32}
+            step={4}
+            onChange={(e) => handleSizeChange(+e.currentTarget.value)}
+          />
+          {size}
+        </label>
+        <label>
+          Dot Size:
+          <input
+            type="range"
+            value={dotSize}
+            min={0.5}
+            max={5}
+            step={0.5}
+            onChange={(e) => handleDotSizeChange(+e.currentTarget.value)}
+          />
+          {dotSize}
+        </label>
+        <div className={styles.templateTiles}>
+          <div
+            className={`${styles.cell} ${
+              templateTile === undefined && styles.cellSelected
+            }`}
+            onClick={() => setTemplateTile(undefined)}
+          >
+            👆
+          </div>
+          {[1, 2, 3, 4].map((i) => {
+            return (
+              <div
+                key={i}
+                className={`${styles.cell} ${
+                  templateTile === i && styles.cellSelected
+                }`}
+                onClick={() => setTemplateTile(i)}
+              >
+                <Dot shape={i} rotation={0} color={color} />
+              </div>
+            );
+          })}
         </div>
-        {[1, 2, 3, 4].map((i) => {
-          return (
-            <div
-              key={i}
-              className={`${styles.cell} ${
-                templateTile === i && styles.cellSelected
-              }`}
-              onClick={() => setTemplateTile(i)}
-            >
-              <Dot shape={i} rotation={0} color="#000000" />
-            </div>
-          );
-        })}
+        <div className={styles.actions}>
+          <input
+            type="color"
+            value={color}
+            onInput={(e) => setColor(e.currentTarget.value)}
+          />
+          <button onClick={() => rotateDot(-1)}>Rotate</button>
+          <button onClick={deleteDot}>Delete</button>
+        </div>
       </div>
-      <div className={styles.actions}>
-        <input
-          type="color"
-          value={color}
-          onInput={(e) => setColor(e.currentTarget.value)}
-        />
-        <button onClick={() => rotateDot(-1)}>Rotate</button>
-        <button onClick={deleteDot}>Delete</button>
+      <div>
+        <button onClick={exportGrid}>Export</button>
+        <button
+          onClick={() =>
+            openModal(
+              <div>
+                <input
+                  id="file"
+                  type="file"
+                  onLoad={(e) => console.log(e)}
+                ></input>
+                <button onClick={loadGrid}>Load</button>
+              </div>
+            )
+          }
+        >
+          Import
+        </button>
       </div>
     </section>
   );

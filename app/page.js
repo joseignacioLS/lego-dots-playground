@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import styles from "./page.module.scss";
 import Controllers from "./components/Controllers";
 import Grid from "./components/Grid";
+import { ModalContext } from "./context/modal";
+import Modal from "./components/Modal";
+import Instructions from "./components/Instructions";
 
 const generateGrid = (value) => {
   return [...new Array(value)].map((_) => {
@@ -20,6 +23,8 @@ export default function Home() {
   const [grid, setGrid] = useState(initialValue);
   const [templateTile, setTemplateTile] = useState(undefined);
   const [selectedCell, setSelectedCell] = useState([undefined, undefined]);
+
+  const { isVisible, openModal } = useContext(ModalContext);
 
   const onClick = (e, position) => {
     e.preventDefault();
@@ -113,7 +118,6 @@ export default function Home() {
     setDotSize(value);
   };
 
-
   const generateListeners = (e) => {
     if (e.key === "q") {
       deleteDot();
@@ -143,22 +147,18 @@ export default function Home() {
 
   return (
     <main className={styles.main}>
-      <h1>Lego Dots Playground</h1>
-      <p>
-        <b>Select the Dot</b> you want to place and{" "}
-        <b>click on the board to place it.</b>
-      </p>
-      <em>
-        Tip: Fast select the Dot using 1, 2, 3 and 4 in your keyboard, of E for
-        the hand.
-      </em>
-      <p>
-        Use the <b>W and R keys to rotate</b> the selected position (highlighted
-        in red)
-      </p>
-      <p>
-        Use the <b>Q key to remove</b> the Dot in the selected position
-      </p>
+      <h1>
+        Lego Dots Playground{" "}
+        <span onClick={() => openModal(<Instructions />)}>💡</span>
+      </h1>
+
+      <Grid
+        grid={grid}
+        selectedCell={selectedCell}
+        color={color}
+        onClick={onClick}
+        dotSize={dotSize}
+      />
       <Controllers
         templateTile={templateTile}
         setTemplateTile={setTemplateTile}
@@ -170,22 +170,10 @@ export default function Home() {
         setColor={setColor}
         rotateDot={rotateDot}
         deleteDot={deleteDot}
+        loadGrid={loadGrid}
+        exportGrid={exportGrid}
       />
-      <Grid
-        grid={grid}
-        selectedCell={selectedCell}
-        color={color}
-        onClick={onClick}
-        dotSize={dotSize}
-      />
-      <h2>Export and Load designs</h2>
-      <div>
-        <input id="file" type="file" onLoad={(e) => console.log(e)}></input>
-        <button onClick={loadGrid}>Load</button>
-      </div>
-      <div>
-        <button onClick={exportGrid}>Export</button>
-      </div>
+      {isVisible && <Modal></Modal>}
     </main>
   );
 }
