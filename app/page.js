@@ -111,7 +111,17 @@ export default function Home() {
 
   const handleSizeChange = (value) => {
     setSize(value);
-    setGrid(generateGrid(value));
+    setGrid(oldGrid => {
+      const newGrid = generateGrid(value);
+      oldGrid.forEach((row, y) => {
+        row.forEach((cell, x) => {
+          if (newGrid.length <= y) return
+          if (newGrid[y].length <= x) return
+          newGrid[y][x] = cell
+        })
+      })
+      return newGrid
+    });
   };
 
   const handleDotSizeChange = (value) => {

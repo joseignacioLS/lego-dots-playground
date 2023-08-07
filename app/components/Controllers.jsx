@@ -17,7 +17,7 @@ const Controllers = ({
   loadGrid,
   exportGrid,
 }) => {
-  const { openModal } = useContext(ModalContext);
+  const { openModal, hideModal } = useContext(ModalContext);
   return (
     <section className={styles.controls}>
       <div className={styles.managing}>
@@ -78,7 +78,7 @@ const Controllers = ({
           <button onClick={deleteDot}>Delete</button>
         </div>
       </div>
-      <div>
+      <div className={styles.loadOptions}>
         <button onClick={exportGrid}>Export</button>
         <button
           onClick={() =>
@@ -89,7 +89,10 @@ const Controllers = ({
                   type="file"
                   onLoad={(e) => console.log(e)}
                 ></input>
-                <button onClick={loadGrid}>Load</button>
+                <button onClick={() => {
+                  loadGrid()
+                  hideModal();
+                  }}>Load</button>
               </div>
             )
           }
