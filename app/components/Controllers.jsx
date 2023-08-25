@@ -28,7 +28,7 @@ const Controllers = ({
             value={size}
             min={4}
             max={64}
-            step={4}
+            step={1}
             onChange={(e) => handleSizeChange(+e.currentTarget.value)}
           />
           {size}
