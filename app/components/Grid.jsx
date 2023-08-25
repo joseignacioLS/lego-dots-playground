@@ -20,7 +20,7 @@ const Grid = ({ grid, selectedCell, color, onClick, dotSize }) => {
                   style={{
                     width: dotSize + "rem",
                   }}
-                  onClick={(e) => {
+                  onMouseDown={(e) => {
                     onClick(e, [i, j]);
                   }}
                 >

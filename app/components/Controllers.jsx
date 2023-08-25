@@ -27,7 +27,7 @@ const Controllers = ({
             type="range"
             value={size}
             min={4}
-            max={32}
+            max={64}
             step={4}
             onChange={(e) => handleSizeChange(+e.currentTarget.value)}
           />
@@ -89,10 +89,14 @@ const Controllers = ({
                   type="file"
                   onLoad={(e) => console.log(e)}
                 ></input>
-                <button onClick={() => {
-                  loadGrid()
-                  hideModal();
-                  }}>Load</button>
+                <button
+                  onClick={() => {
+                    loadGrid();
+                    hideModal();
+                  }}
+                >
+                  Load
+                </button>
               </div>
             )
           }
