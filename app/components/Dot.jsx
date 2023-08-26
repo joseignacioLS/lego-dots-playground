@@ -7,6 +7,7 @@ const dotShape = {
   2: styles.dotCurve,
   3: styles.dotSemiCircle,
   4: styles.dotCircle,
+  5: styles.remove,
 };
 
 const dotRotation = {

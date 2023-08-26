@@ -54,13 +54,14 @@ const Controllers = ({
           >
             👆
           </div>
-          {[1, 2, 3, 4].map((i) => {
+          {[1, 2, 3, 4, 0].map((i) => {
             return (
               <div
                 key={i}
                 className={`${styles.cell} ${
                   templateTile === i && styles.cellSelected
                 }`}
+                style={{ border: "1px solid black" }}
                 onClick={() => setTemplateTile(i)}
               >
                 <Dot shape={i} rotation={0} color={color} />
