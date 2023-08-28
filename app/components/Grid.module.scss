@@ -1,14 +1,28 @@
 .grid {
+  position: relative;
   padding: 5px;
   display: flex;
   flex-direction: column;
   gap: 1px;
+  width: 100%;
 
   background-color: white;
   overflow: auto;
 }
 
+.printModeGrid {
+  padding: 3rem;
+  background: url("/paper.jpg");
+  background-position: center;
+  background-size: cover;
+
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
 .row {
+  flex-grow: 0;
   flex-shrink: 0;
   display: flex;
   gap: 1px;
@@ -31,4 +45,21 @@
     outline: 2px solid red;
     z-index: 1;
   }
+}
+
+.print {
+  background-color: transparent;
+  outline: none;
+  z-index: 0
+}
+
+.texture {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  mix-blend-mode: color-burn;
+  backdrop-filter: blur(1px);
+  opacity: .8;
 }

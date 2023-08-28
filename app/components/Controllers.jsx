@@ -1,7 +1,8 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import styles from "./Controllers.module.scss";
 import Dot from "./Dot";
 import { ModalContext } from "../context/modal";
+import { colors } from "../data/data";
 
 const Controllers = ({
   templateTile,
@@ -16,95 +17,141 @@ const Controllers = ({
   deleteDot,
   loadGrid,
   exportGrid,
+  printMode,
+  setPrintMode,
 }) => {
   const { openModal, hideModal } = useContext(ModalContext);
+
+  useEffect(() => {
+    setColor(colors[0]);
+  }, []);
+
   return (
     <section className={styles.controls}>
-      <div className={styles.managing}>
-        <label>
-          Board Size:
-          <input
-            type="range"
-            value={size}
-            min={4}
-            max={64}
-            step={1}
-            onChange={(e) => handleSizeChange(+e.currentTarget.value)}
-          />
-          {size}
-        </label>
-        <label>
-          Dot Size:
-          <input
-            type="range"
-            value={dotSize}
-            min={0.5}
-            max={5}
-            step={0.5}
-            onChange={(e) => handleDotSizeChange(+e.currentTarget.value)}
-          />
-          {dotSize}
-        </label>
-        <div className={styles.templateTiles}>
-          <div
-            className={`${styles.cell} ${
-              templateTile === undefined && styles.cellSelected
-            }`}
-            onClick={() => setTemplateTile(undefined)}
-          >
-            👆
-          </div>
-          {[1, 2, 3, 4, 0].map((i) => {
-            return (
-              <div
-                key={i}
-                className={`${styles.cell} ${
-                  templateTile === i && styles.cellSelected
-                }`}
-                style={{ border: "1px solid black" }}
-                onClick={() => setTemplateTile(i)}
-              >
-                <Dot shape={i} rotation={0} color={color} />
-              </div>
-            );
-          })}
-        </div>
-        <div className={styles.actions}>
-          <input
-            type="color"
-            value={color}
-            onInput={(e) => setColor(e.currentTarget.value)}
-          />
-          <button onClick={() => rotateDot(-1)}>Rotate</button>
-          <button onClick={deleteDot}>Delete</button>
-        </div>
-      </div>
-      <div className={styles.loadOptions}>
-        <button onClick={exportGrid}>Export</button>
-        <button
-          onClick={() =>
-            openModal(
+      <label>
+        <input
+          type="checkbox"
+          onChange={(e) => setPrintMode(e.currentTarget.checked)}
+        ></input>
+        Print Mode
+      </label>
+      {!printMode && (
+        <>
+          <div className={styles.managing}>
+            <label className={styles.labelAndButtons}>
+              Board Size
               <div>
-                <input
-                  id="file"
-                  type="file"
-                  onLoad={(e) => console.log(e)}
-                ></input>
-                <button
-                  onClick={() => {
-                    loadGrid();
-                    hideModal();
+                <button onClick={(e) => handleSizeChange(size - 1)}>-</button>
+                <span
+                  style={{
+                    display: "inline-block",
+                    width: "2rem",
+                    margin: "0 .5rem",
+                    textAlign: "center",
                   }}
                 >
-                  Load
+                  {size}
+                </span>
+                <button onClick={(e) => handleSizeChange(size + 1)}>+</button>
+              </div>
+            </label>
+            <label className={styles.labelAndButtons}>
+              Dot Size
+              <div>
+                <button onClick={(e) => handleDotSizeChange(dotSize - 0.5)}>
+                  -
+                </button>
+                <span
+                  style={{
+                    display: "inline-block",
+                    width: "2rem",
+                    margin: "0 .5rem",
+                    textAlign: "center",
+                  }}
+                >
+                  {dotSize}
+                </span>
+
+                <button onClick={(e) => handleDotSizeChange(dotSize + 0.5)}>
+                  +
                 </button>
               </div>
-            )
-          }
-        >
-          Import
-        </button>
-      </div>
+            </label>
+            <div className={styles.templateTiles}>
+              <div
+                className={`${styles.cell} ${
+                  templateTile === undefined && styles.cellSelected
+                }`}
+                onClick={() => setTemplateTile(undefined)}
+              >
+                👆
+              </div>
+              {[1, 2, 3, 4, 0].map((i) => {
+                return (
+                  <div
+                    key={i}
+                    className={`${styles.cell} ${
+                      templateTile === i && styles.cellSelected
+                    }`}
+                    style={{ border: "1px solid black" }}
+                    onClick={() => setTemplateTile(i)}
+                  >
+                    <Dot shape={i} rotation={0} color={color} />
+                  </div>
+                );
+              })}
+            </div>
+            <div className={styles.templateColors}>
+              {colors.map((ccolor) => {
+                return (
+                  <div
+                    key={ccolor}
+                    onClick={(e) => {
+                      setColor(ccolor);
+                    }}
+                    style={{
+                      width: "2rem",
+                      height: "2rem",
+                      backgroundColor: ccolor,
+                      border: ccolor === color && "2px solid red",
+                    }}
+                  ></div>
+                );
+              })}
+            </div>
+            <div className={styles.actions}>
+              <button onClick={() => rotateDot(-1)}>Rotate</button>
+              <button onClick={deleteDot}>Delete</button>
+            </div>
+          </div>
+          <div className={styles.loadOptions}>
+            <button onClick={exportGrid}>Export</button>
+            <button
+              onClick={() =>
+                openModal(
+                  <div>
+                    <input
+                      id="file"
+                      type="file"
+                      onLoad={(e) => console.log(e)}
+                    ></input>
+                    <button
+                      onClick={() => {
+                        loadGrid();
+                        hideModal();
+                      }}
+                    >
+                      Load
+                    </button>
+                  </div>
+                )
+              }
+            >
+              Import
+            </button>
+          </div>
+        </>
+      )}
     </section>
   );
 };

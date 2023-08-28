@@ -3,7 +3,7 @@
   margin: 0 -1rem;
   padding: 1rem;
 
-  width: 100%;
+  width: fit-content;
   max-height: 50vh;
 
   display: flex;
@@ -35,9 +35,8 @@
       flex-wrap: wrap;
 
       >* {
-        width: calc(100% / 7);
         height: auto;
-        aspect-ratio: 1 / 1;
+        aspect-ratio: 2 / 1;
 
         display: flex;
         justify-content: center;
@@ -45,7 +44,7 @@
       }
     }
 
-    .templateTiles {
+    .templateTiles, .templateColors {
       display: flex;
       gap: 0.5rem;
       flex-wrap: wrap;
@@ -53,6 +52,7 @@
       padding-bottom: 1rem;
       border-bottom: 1px solid black;
     }
+
 
   }
 
@@ -80,4 +80,9 @@
       outline: 2px solid red;
     }
   }
+}
+
+.labelAndButtons {
+  display: flex;
+  flex-direction: column;
 }
