@@ -30,21 +30,6 @@ export default function Home() {
 
   const { isVisible, openModal } = useContext(ModalContext);
 
-  const updateColor = (value) => {
-    setColor(value);
-    setGrid((oldValue) => {
-      return oldValue.map((row, y) => {
-        return row.map((cell, x) => {
-          if (cell[0] === 0) return cell;
-          if (isInsideSelection(x, y)) {
-            cell[2] = value;
-          }
-          return cell;
-        });
-      });
-    });
-  };
-
   const onClick = (e, position) => {
     e.preventDefault();
     setGrid((oldState) => {
@@ -67,35 +52,7 @@ export default function Home() {
     });
   };
 
-  const deleteDot = () => {
-    setGrid((oldState) => {
-      return oldState.map((row, y) => {
-        return row.map((cell, x) => {
-          if (isInsideSelection(x, y)) {
-            setSelectedCell([undefined, undefined]);
-            cell[0] = 0;
-            cell[1] = 0;
-          }
-          return cell;
-        });
-      });
-    });
-  };
-
-  const rotateDot = (dir = 1) => {
-    setGrid((oldState) => {
-      return oldState.map((row, y) => {
-        if (y !== selectedCell[0]) return row;
-        return row.map((cell, x) => {
-          if (x !== selectedCell[1]) return cell;
-          cell[1] += dir;
-          if (cell[1] > 3) cell[1] = 0;
-          if (cell[1] < 0) cell[1] = 3;
-          return cell;
-        });
-      });
-    });
-  };
+  // GRID
 
   const loadGrid = () => {
     const fileInput = document.querySelector("#file");
@@ -153,6 +110,7 @@ export default function Home() {
     setDotSize(value);
   };
 
+  // HELPER SELECTION
   const isInsideGrid = (x, y) => {
     return y >= 0 && x >= 0 && x < grid[0].length && y < grid.length;
   };
@@ -163,6 +121,52 @@ export default function Home() {
     const dI = [selectedCell[0], selectedCell2[0]].sort((a, b) => a - b);
     const dJ = [selectedCell[1], selectedCell2[1]].sort((a, b) => a - b);
     return y >= dI[0] && y <= dI[1] && x >= dJ[0] && x <= dJ[1];
+  };
+
+  // MODIFY DOTS
+  const updateColor = (value) => {
+    setColor(value);
+    setGrid((oldValue) => {
+      return oldValue.map((row, y) => {
+        return row.map((cell, x) => {
+          if (cell[0] === 0) return cell;
+          if (isInsideSelection(x, y)) {
+            cell[2] = value;
+          }
+          return cell;
+        });
+      });
+    });
+  };
+
+  const deleteDot = () => {
+    setGrid((oldState) => {
+      return oldState.map((row, y) => {
+        return row.map((cell, x) => {
+          if (isInsideSelection(x, y)) {
+            setSelectedCell([undefined, undefined]);
+            cell[0] = 0;
+            cell[1] = 0;
+          }
+          return cell;
+        });
+      });
+    });
+  };
+
+  const rotateDot = (dir = 1) => {
+    setGrid((oldState) => {
+      return oldState.map((row, y) => {
+        if (y !== selectedCell[0]) return row;
+        return row.map((cell, x) => {
+          if (x !== selectedCell[1]) return cell;
+          cell[1] += dir;
+          if (cell[1] > 3) cell[1] = 0;
+          if (cell[1] < 0) cell[1] = 3;
+          return cell;
+        });
+      });
+    });
   };
 
   const updateSelectedCell = (setter, dY, dX) => {
@@ -225,6 +229,8 @@ export default function Home() {
     });
   };
 
+  // EVENT LISTENERS
+
   const generateListeners = (e) => {
     e.preventDefault();
     if (e.key === "q") {
@@ -274,7 +280,7 @@ export default function Home() {
   return (
     <main className={styles.main}>
       <h1>
-        Lego Dots Playground{" "}
+        Lego Dots Playground DEVELOP
         <span onClick={() => openModal(<Instructions />)}>💡</span>
       </h1>
 
