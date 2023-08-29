@@ -70,6 +70,7 @@ const Controllers = ({
               </div>
               {[square, curveCorner, rectangle, digglet, circle].map(
                 (template, i) => {
+                  if (!template?.size) return <></>;
                   return (
                     <div
                       key={i}
