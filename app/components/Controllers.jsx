@@ -83,8 +83,8 @@ const Controllers = ({
                         template={template}
                         color={color}
                         size={32}
-                        w={template.size[0]}
-                        h={template.size[1]}
+                        w={template?.size?.[0]}
+                        h={template?.size?.[1]}
                       />
                     </div>
                   );

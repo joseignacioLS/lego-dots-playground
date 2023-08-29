@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { drawOnCanvas } from "../utils/canvas";
 
-const Miniature = ({ template, color, size, w, h }) => {
+const Miniature = ({ template, color, size = 32, w = 1, h = 1 }) => {
   const canvasref = useRef();
 
   useEffect(() => {
