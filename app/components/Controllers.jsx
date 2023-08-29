@@ -5,6 +5,8 @@ import { colors } from "../data/data";
 import { circle, curveCorner, digglet, rectangle, square } from "../data/dots";
 import Miniature from "./Miniature";
 
+const templates = [square, curveCorner, digglet, circle, rectangle];
+
 const Controllers = ({
   templateTile,
   setTemplateTile,
@@ -68,29 +70,27 @@ const Controllers = ({
               >
                 👆
               </div>
-              {[square, curveCorner, rectangle, digglet, circle].map(
-                (template, i) => {
-                  if (!template?.size) return <></>;
-                  return (
-                    <div
-                      key={i}
-                      className={`${styles.cell} ${
-                        templateTile === template && styles.cellSelected
-                      }`}
-                      style={{ border: "1px solid black" }}
-                      onClick={() => setTemplateTile(template)}
-                    >
-                      <Miniature
-                        template={template}
-                        color={color}
-                        size={32}
-                        w={template?.size?.[0]}
-                        h={template?.size?.[1]}
-                      />
-                    </div>
-                  );
-                }
-              )}
+              {templates.map((template, i) => {
+                if (!template?.size) return <>X</>;
+                return (
+                  <div
+                    key={i}
+                    className={`${styles.cell} ${
+                      templateTile === template && styles.cellSelected
+                    }`}
+                    style={{ border: "1px solid black" }}
+                    onClick={() => setTemplateTile(template)}
+                  >
+                    <Miniature
+                      template={template}
+                      color={color}
+                      size={32}
+                      w={template?.size?.[0]}
+                      h={template?.size?.[1]}
+                    />
+                  </div>
+                );
+              })}
             </div>
             <div className={styles.templateColors}>
               {colors.map((ccolor) => {
