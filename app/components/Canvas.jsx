@@ -93,8 +93,8 @@ const Canvas = ({
           image,
           0,
           0,
-          1920,
-          1280,
+          image.width,
+          image.height,
           0,
           0,
           (highRes + calculateGap(highRes)) * drawnSize[0],
@@ -104,6 +104,7 @@ const Canvas = ({
         ctx.filter = "blur(1px)";
         drawDots(highRes);
         ctx.filter = "none";
+        
         const image2 = document.createElement("img");
         image2.onload = () => {
           ctx.globalAlpha = 0.8;
@@ -112,8 +113,8 @@ const Canvas = ({
             image2,
             0,
             0,
-            1023,
-            683,
+            image2.width,
+            image2.height,
             0,
             0,
             (highRes + calculateGap(highRes)) * drawnSize[0],

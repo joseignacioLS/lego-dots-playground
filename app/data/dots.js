@@ -85,7 +85,7 @@ export const curve3x3 = {
   start: [0, 2],
   size: [2, 2],
   paths: [
-    { type: "arc", coords: [0, 0.9, 1.1, 0, 2 * GAP_FACTOR, 0] },
+    { type: "arc", coords: [0, 0.9, .9, 0, 2 * GAP_FACTOR, 0] },
     { type: "line", coords: [2 * GAP_FACTOR, 1] },
     { type: "arc", coords: [1.45, 1, 1, 1.45, 1, 2 * GAP_FACTOR] },
     { type: "line", coords: [0, 2 * GAP_FACTOR] },
