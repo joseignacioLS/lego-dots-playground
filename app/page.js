@@ -3,11 +3,11 @@
 import { useContext, useEffect, useState } from "react";
 import styles from "./page.module.scss";
 import Controllers from "./components/Controllers";
-import Grid from "./components/Grid";
 import { ModalContext } from "./context/modal";
 import Modal from "./components/Modal";
 import Instructions from "./components/Instructions";
 import { colors } from "./data/data";
+import Canvas from "./components/Canvas";
 
 const generateGrid = (value) => {
   return [...new Array(value)].map((_) => {
@@ -18,37 +18,40 @@ const generateGrid = (value) => {
 const initialValue = generateGrid(8);
 
 export default function Home() {
+  const [dots, setDots] = useState([]);
   const [size, setSize] = useState(8);
-  const [dotSize, setDotSize] = useState(2);
+  const [dotSize, setDotSize] = useState(128);
   const [color, setColor] = useState("#000000");
-  const [grid, setGrid] = useState(initialValue);
-  const [printMode, setPrintMode] = useState(false);
+  const [rotation, setRotation] = useState(0);
+  const [selectedDots, setSelectedDots] = useState([]);
   const [templateTile, setTemplateTile] = useState(undefined);
-  const [selectedCell, setSelectedCell] = useState([undefined, undefined]);
-  const [multiSelect, setMultiSelect] = useState(false);
-  const [selectedCell2, setSelectedCell2] = useState([undefined, undefined]);
+  const [printMode, setPrintMode] = useState(false);
+
+  const [grid, setGrid] = useState(initialValue);
 
   const { isVisible, openModal } = useContext(ModalContext);
 
-  const onClick = (e, position) => {
-    e.preventDefault();
-    setGrid((oldState) => {
-      return oldState.map((row, y) => {
-        if (y !== position[0]) return row;
-        return row.map((cell, x) => {
-          if (x !== position[1]) return cell;
-          if (multiSelect && selectedCell[0] !== undefined) {
-            setSelectedCell2([y, x]);
-          } else {
-            setSelectedCell2([undefined, undefined]);
-            setSelectedCell([y, x]);
-          }
-          if (templateTile === undefined) return cell;
-          cell[0] = templateTile;
-          cell[2] = color;
-          return cell;
-        });
-      });
+  const addDot = (dot) => {
+    setDots((oldValue) => [...oldValue, dot]);
+  };
+
+  const removeSelectedDots = () => {
+    setDots((oldValue) => {
+      return oldValue.filter((dot, i) => !selectedDots.includes(i));
+    });
+    setSelectedDots([]);
+  };
+  const removeDot = (dots) => {
+    setDots((oldValue) => {
+      return oldValue.filter((dot, i) => !dots.includes(i));
+    });
+  };
+
+  const toggleSelected = (dot) => {
+    if (dot === undefined) return setSelectedDots([]);
+    setSelectedDots((oldValue) => {
+      if (oldValue.includes(dot)) return oldValue.filter((d) => d !== dot);
+      return [...oldValue, dot];
     });
   };
 
@@ -68,7 +71,6 @@ export default function Home() {
         if (parsed[0][0].length !== 2) return;
         setSize(parsed.length);
         setGrid(parsed);
-        setSelectedCell([undefined, undefined]);
       } catch (err) {
         console.log(err);
       }
@@ -110,122 +112,26 @@ export default function Home() {
     setDotSize(value);
   };
 
-  // HELPER SELECTION
-  const isInsideGrid = (x, y) => {
-    return y >= 0 && x >= 0 && x < grid[0].length && y < grid.length;
-  };
-
-  const isInsideSelection = (x, y) => {
-    if (selectedCell2[0] === undefined)
-      return selectedCell[0] === y && selectedCell[1] === x;
-    const dI = [selectedCell[0], selectedCell2[0]].sort((a, b) => a - b);
-    const dJ = [selectedCell[1], selectedCell2[1]].sort((a, b) => a - b);
-    return y >= dI[0] && y <= dI[1] && x >= dJ[0] && x <= dJ[1];
-  };
-
   // MODIFY DOTS
   const updateColor = (value) => {
     setColor(value);
-    setGrid((oldValue) => {
-      return oldValue.map((row, y) => {
-        return row.map((cell, x) => {
-          if (cell[0] === 0) return cell;
-          if (isInsideSelection(x, y)) {
-            cell[2] = value;
-          }
-          return cell;
-        });
-      });
-    });
-  };
-
-  const deleteDot = () => {
-    setGrid((oldState) => {
-      return oldState.map((row, y) => {
-        return row.map((cell, x) => {
-          if (isInsideSelection(x, y)) {
-            setSelectedCell([undefined, undefined]);
-            cell[0] = 0;
-            cell[1] = 0;
-          }
-          return cell;
-        });
-      });
-    });
   };
 
   const rotateDot = (dir = 1) => {
-    setGrid((oldState) => {
-      return oldState.map((row, y) => {
-        if (y !== selectedCell[0]) return row;
-        return row.map((cell, x) => {
-          if (x !== selectedCell[1]) return cell;
-          cell[1] += dir;
-          if (cell[1] > 3) cell[1] = 0;
-          if (cell[1] < 0) cell[1] = 3;
-          return cell;
-        });
-      });
-    });
-  };
-
-  const updateSelectedCell = (setter, dY, dX) => {
-    setter((old) => {
-      let x = old[0] + dX;
-      let y = old[1] + dY;
-      if (x < 0) x = 0;
-      if (y < 0) y = 0;
-      if (x >= grid[0].length) x = grid[0].length - 1;
-      if (y >= grid.length) y = grid.length - 1;
-      return [x, y];
+    setRotation((oldValue) => {
+      let newValue = oldValue + 90 * dir;
+      if (newValue < 0) newValue += 360;
+      if (newValue >= 360) newValue -= 360;
+      return newValue;
     });
   };
 
   const moveDot = (dX = 0, dY = 0) => {
-    if (selectedCell[0] === undefined) return;
-    setGrid((oldGrid) => {
-      const value = oldGrid[selectedCell[0]][selectedCell[1]];
-      const newGrid = generateGrid(oldGrid.length);
-      oldGrid.forEach((row, y) => {
-        row.forEach((cell, x) => {
-          if (newGrid.length <= y) return;
-          if (newGrid[y].length <= x) return;
-          newGrid[y][x] = cell;
-        });
-      });
-      if (selectedCell2[0] === undefined) {
-        try {
-          if (isInsideGrid(selectedCell[1] + dX, selectedCell[0] + dY)) {
-            newGrid[selectedCell[0] + dY][selectedCell[1] + dX] = value;
-            newGrid[selectedCell[0]][selectedCell[1]] = [0, 0];
-          }
-        } catch (err) {
-          console.log(err);
-        }
-      } else {
-        const dI = [selectedCell[0], selectedCell2[0]].sort((a, b) => a - b);
-        const dJ = [selectedCell[1], selectedCell2[1]].sort((a, b) => a - b);
-        try {
-          const sample = [];
-          for (let i = dI[0]; i <= dI[1]; i++) {
-            sample.push([]);
-            for (let j = dJ[0]; j <= dJ[1]; j++) {
-              sample.at(-1).push(oldGrid[i][j]);
-              newGrid[i][j] = [0, 0];
-            }
-          }
-          for (let i = dI[0]; i <= dI[1]; i++) {
-            for (let j = dJ[0]; j <= dJ[1]; j++) {
-              newGrid[i + dY][j + dX] = sample[i - dI[0]][j - dJ[0]];
-            }
-          }
-          updateSelectedCell(setSelectedCell2, dX, dY);
-        } catch (err) {
-          console.log(err);
-        }
-      }
-      updateSelectedCell(setSelectedCell, dX, dY);
-      return newGrid;
+    selectedDots.forEach((dot) => {
+      dots[dot].position = [
+        dots[dot].position[0] + dX,
+        dots[dot].position[1] + dY,
+      ];
     });
   };
 
@@ -234,21 +140,13 @@ export default function Home() {
   const generateListeners = (e) => {
     e.preventDefault();
     if (e.key === "q") {
-      deleteDot();
+      removeSelectedDots();
     } else if (e.key === "r") {
-      rotateDot(-1);
-    } else if (e.key === "w") {
       rotateDot(1);
+    } else if (e.key === "w") {
+      rotateDot(-1);
     } else if (e.key === "e") {
       setTemplateTile(undefined);
-    } else if (e.key === "1") {
-      setTemplateTile(1);
-    } else if (e.key === "2") {
-      setTemplateTile(2);
-    } else if (e.key === "3") {
-      setTemplateTile(3);
-    } else if (e.key === "4") {
-      setTemplateTile(4);
     } else if (e.key === "ArrowRight") {
       moveDot(1, 0);
     } else if (e.key === "ArrowLeft") {
@@ -257,25 +155,19 @@ export default function Home() {
       moveDot(0, -1);
     } else if (e.key === "ArrowDown") {
       moveDot(0, 1);
-    } else if (e.key === "Shift") {
-      setMultiSelect(true);
-    }
-  };
-
-  const generateReleaseListeners = (e) => {
-    if (e.key === "Shift") {
-      setMultiSelect(false);
     }
   };
 
   useEffect(() => {
     document.addEventListener("keydown", generateListeners);
-    document.addEventListener("keyup", generateReleaseListeners);
     return () => {
       document.removeEventListener("keydown", generateListeners);
-      document.removeEventListener("keyup", generateReleaseListeners);
     };
-  }, [selectedCell, selectedCell2]);
+  }, [selectedDots]);
+
+  useEffect(() => {
+    if (printMode) setSelectedDots([]);
+  }, []);
 
   return (
     <main className={styles.main}>
@@ -283,15 +175,18 @@ export default function Home() {
         Lego Dots Playground DEVELOP
         <span onClick={() => openModal(<Instructions />)}>💡</span>
       </h1>
-
-      <Grid
-        grid={grid}
-        selectedCell={selectedCell}
-        selectedCell2={selectedCell2}
-        color={color}
-        onClick={onClick}
+      <Canvas
         dotSize={dotSize}
+        size={size}
+        dots={dots}
+        addDot={addDot}
+        removeDot={removeDot}
+        color={color}
+        rotation={rotation}
+        template={templateTile}
         printMode={printMode}
+        selectedDots={selectedDots}
+        toggleSelected={toggleSelected}
       />
       <Controllers
         templateTile={templateTile}
@@ -303,7 +198,7 @@ export default function Home() {
         color={color}
         setColor={updateColor}
         rotateDot={rotateDot}
-        deleteDot={deleteDot}
+        deleteDot={removeSelectedDots}
         loadGrid={loadGrid}
         exportGrid={exportGrid}
         printMode={printMode}

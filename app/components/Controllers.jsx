@@ -3,6 +3,7 @@ import styles from "./Controllers.module.scss";
 import Dot from "./Dot";
 import { ModalContext } from "../context/modal";
 import { colors } from "../data/data";
+import { curveCorner, digglet, rectangle, square } from "../data/dots";
 
 const Controllers = ({
   templateTile,
@@ -13,7 +14,6 @@ const Controllers = ({
   handleDotSizeChange,
   color,
   setColor,
-  rotateDot,
   deleteDot,
   loadGrid,
   exportGrid,
@@ -58,7 +58,7 @@ const Controllers = ({
             <label className={styles.labelAndButtons}>
               Dot Size
               <div>
-                <button onClick={(e) => handleDotSizeChange(dotSize - 0.5)}>
+                <button onClick={(e) => handleDotSizeChange(dotSize - 4)}>
                   -
                 </button>
                 <span
@@ -72,7 +72,7 @@ const Controllers = ({
                   {dotSize}
                 </span>
 
-                <button onClick={(e) => handleDotSizeChange(dotSize + 0.5)}>
+                <button onClick={(e) => handleDotSizeChange(dotSize + 4)}>
                   +
                 </button>
               </div>
@@ -86,7 +86,7 @@ const Controllers = ({
               >
                 👆
               </div>
-              {[1, 2, 3, 4, 0].map((i) => {
+              {[square, curveCorner, rectangle, digglet].map((template, i) => {
                 return (
                   <div
                     key={i}
@@ -94,9 +94,9 @@ const Controllers = ({
                       templateTile === i && styles.cellSelected
                     }`}
                     style={{ border: "1px solid black" }}
-                    onClick={() => setTemplateTile(i)}
+                    onClick={() => setTemplateTile(template)}
                   >
-                    <Dot shape={i} rotation={0} color={color} />
+                    {i}
                   </div>
                 );
               })}
@@ -120,7 +120,6 @@ const Controllers = ({
               })}
             </div>
             <div className={styles.actions}>
-              <button onClick={() => rotateDot(-1)}>Rotate</button>
               <button onClick={deleteDot}>Delete</button>
             </div>
           </div>
