@@ -6,6 +6,9 @@
   grid-template-columns: 1fr;
   grid-template-rows: auto 1fr auto;
 
+  aspect-ratio: 4 / 3;
+  margin: auto;
+
   @media (min-width: 600px) {
     grid-template-columns: 1fr auto;
     grid-template-rows: auto 1fr;
