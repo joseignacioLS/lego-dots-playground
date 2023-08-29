@@ -5,74 +5,13 @@ import {
   calculateGap,
   coordsToPosition,
   positionToCoords,
-  rotatePoint,
 } from "../utils/space";
+import { drawOnCanvas } from "../utils/canvas";
 
-const drawGrid = (ctx, dotSize, gap, rows, columns) => {
-  for (let i = 0; i < columns; i++) {
-    for (let j = 0; j < rows; j++) {
-      const x = j * (dotSize + gap);
-      const y = i * (dotSize + gap);
-      drawOnCanvas(ctx, [x, y], square, 0, "#BBB", dotSize);
-    }
-  }
-};
-
-const drawOnCanvas = (
-  ctx,
-  startPosition,
-  path,
-  rotation = 0,
-  color = "#000",
-  scale = 50
-) => {
-  ctx.fillStyle = color;
-  ctx.beginPath();
-  const rotationPoint = [
-    startPosition[0] + path.center[0] * scale,
-    startPosition[1] + path.center[1] * scale,
-  ];
-  const rotatedStart = rotatePoint(
-    startPosition[0] + path.start[0] * scale,
-    startPosition[1] + path.start[1] * scale,
-    ...rotationPoint,
-    rotation
-  );
-  ctx.moveTo(...rotatedStart);
-  path.paths.forEach((path) => {
-    if (path.type === "line") {
-      const [x, y] = [
-        startPosition[0] + path.coords[0] * scale,
-        startPosition[1] + path.coords[1] * scale,
-      ];
-      const [rX, rY] = rotatePoint(x, y, ...rotationPoint, rotation);
-      ctx.lineTo(rX, rY);
-    }
-    if (path.type === "arc") {
-      const [x0, y0] = [
-        startPosition[0] + path.coords[0] * scale,
-        startPosition[1] + path.coords[1] * scale,
-      ];
-      const [rX0, rY0] = rotatePoint(x0, y0, ...rotationPoint, rotation);
-      const [x1, y1] = [
-        startPosition[0] + path.coords[2] * scale,
-        startPosition[1] + path.coords[3] * scale,
-      ];
-      const [rX1, rY1] = rotatePoint(x1, y1, ...rotationPoint, rotation);
-      const [x2, y2] = [
-        startPosition[0] + path.coords[4] * scale,
-        startPosition[1] + path.coords[5] * scale,
-      ];
-      const [rX2, rY2] = rotatePoint(x2, y2, ...rotationPoint, rotation);
-      ctx.bezierCurveTo(rX0, rY0, rX1, rY1, rX2, rY2);
-    }
-  });
-  ctx.fill();
-};
+const highRes = 128;
 
 const Canvas = ({
   dotSize = 128,
-  size = 15,
   template = undefined,
   dots = [],
   addDot,
@@ -90,6 +29,19 @@ const Canvas = ({
   const [mousePosition, setMousePosition] = useState([0, 0]);
 
   const [isCollision, setIsCollision] = useState(-1);
+
+  const [drawnSize, setDrawnSize] = useState([8, 8]);
+
+  const drawGrid = () => {
+    const gap = calculateGap(dotSize);
+    for (let i = 0; i < Math.round(canvasSize / dotSize); i++) {
+      for (let j = 0; j < Math.round(canvasSize / dotSize); j++) {
+        const x = j * (dotSize + gap);
+        const y = i * (dotSize + gap);
+        drawOnCanvas(ctx, [x, y], square, 0, "#DDD", dotSize);
+      }
+    }
+  };
 
   const handleClick = () => {
     if (!mousePosition) return;
@@ -128,8 +80,6 @@ const Canvas = ({
     const y = e.clientY - rect.top;
     const position = coordsToPosition(x, y, dotSize);
     const coords = positionToCoords(...position, dotSize);
-    if (position[0] >= size || position[1] >= size)
-      return setMousePosition(undefined);
     setMousePosition(coords);
   };
 
@@ -139,16 +89,36 @@ const Canvas = ({
       cleanCanvas();
       const image = document.createElement("img");
       image.onload = () => {
-        ctx.drawImage(image, 0, 0, 1920, 1280, 0, 0, canvasSize, canvasSize);
+        ctx.drawImage(
+          image,
+          0,
+          0,
+          1920,
+          1280,
+          0,
+          0,
+          (highRes + calculateGap(highRes)) * drawnSize[0],
+          (highRes + calculateGap(highRes)) * drawnSize[1]
+        );
 
         ctx.filter = "blur(1px)";
-        drawDots();
+        drawDots(highRes);
         ctx.filter = "none";
         const image2 = document.createElement("img");
         image2.onload = () => {
           ctx.globalAlpha = 0.8;
           ctx.globalCompositeOperation = "color-burn";
-          ctx.drawImage(image2, 0, 0, 1023, 683, 0, 0, canvasSize, canvasSize);
+          ctx.drawImage(
+            image2,
+            0,
+            0,
+            1023,
+            683,
+            0,
+            0,
+            (highRes + calculateGap(highRes)) * drawnSize[0],
+            (highRes + calculateGap(highRes)) * drawnSize[1]
+          );
           ctx.globalAlpha = 1;
           ctx.globalCompositeOperation = "normal";
         };
@@ -157,8 +127,8 @@ const Canvas = ({
       image.src = "/paper.jpg";
     } else {
       cleanCanvas();
-      initializeGrid();
-      drawDots();
+      drawGrid();
+      drawDots(dotSize);
     }
   };
 
@@ -166,11 +136,7 @@ const Canvas = ({
     ctx.clearRect(0, 0, 5000, 5000);
   };
 
-  const initializeGrid = () => {
-    drawGrid(ctx, dotSize, calculateGap(dotSize), size, size);
-  };
-
-  const drawDots = () => {
+  const drawDots = (dotSize) => {
     dots.forEach((dot, i) => {
       drawOnCanvas(
         ctx,
@@ -186,11 +152,42 @@ const Canvas = ({
   useEffect(() => {
     if (!ctx) return;
     updateCanvas();
-  }, [ctx, size, canvasSize, dotSize, dots]);
+  }, [ctx, canvasSize, dotSize, dots]);
 
   const resizeListener = () => {
     const width = canvasref.current.getBoundingClientRect().width;
     setCanvasSize(width);
+  };
+
+  const getDrawnSize = () => {
+    const grid = [...new Array(200)].map((_) =>
+      [...new Array(200)].map((_) => 0)
+    );
+    const limits = {
+      minX: Infinity,
+      maxX: 0,
+      minY: Infinity,
+      maxY: 0,
+    };
+    for (let n = 0; n < dots.length; n++) {
+      const dot = dots[n];
+      const collisionMatrix = dot.dot.collision[dot.rotation];
+      for (let i = 0; i < collisionMatrix.length; i++) {
+        for (let j = 0; j < collisionMatrix[i].length; j++) {
+          if (collisionMatrix[i][j] === 0) continue;
+          const y =
+            i + dot.position[1] - Math.floor(collisionMatrix.length / 2);
+          const x =
+            j + dot.position[0] - Math.floor(collisionMatrix.length / 2);
+          if (y < 0 || y >= grid.length || x < 0 || x >= grid.length) continue;
+          if (x < limits.minX) limits.minX = x;
+          if (x > limits.maxX) limits.maxX = x;
+          if (y < limits.minY) limits.minY = y;
+          if (y > limits.maxY) limits.maxY = y;
+        }
+      }
+    }
+    return [limits.maxX + 2, limits.maxY + 2];
   };
 
   useEffect(() => {
@@ -203,8 +200,8 @@ const Canvas = ({
   }, []);
 
   const checkCollisions = ({ position, collision }) => {
-    const grid = [...new Array(size)].map((_) =>
-      [...new Array(size)].map((_) => 0)
+    const grid = [...new Array(200)].map((_) =>
+      [...new Array(200)].map((_) => 0)
     );
 
     const collisionMatrix = collision;
@@ -265,16 +262,24 @@ const Canvas = ({
   }, [mousePosition, template, color, rotation, printMode, selectedDots]);
 
   useEffect(() => {
-    updateCanvas();
+    if (printMode) {
+      const size = getDrawnSize();
+      setDrawnSize(size);
+    }
+    setTimeout(updateCanvas, 500);
   }, [printMode]);
 
   return (
     <canvas
       width={
-        !printMode ? canvasSize : (dotSize + calculateGap(dotSize)) * size
+        !printMode
+          ? canvasSize
+          : (highRes + calculateGap(highRes)) * drawnSize[0]
       }
       height={
-        !printMode ? canvasSize : (dotSize + calculateGap(dotSize)) * size
+        !printMode
+          ? canvasSize
+          : (highRes + calculateGap(highRes)) * drawnSize[1]
       }
       ref={canvasref}
       className={styles.canvas}

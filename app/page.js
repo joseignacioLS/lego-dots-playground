@@ -19,15 +19,12 @@ const initialValue = generateGrid(8);
 
 export default function Home() {
   const [dots, setDots] = useState([]);
-  const [size, setSize] = useState(8);
-  const [dotSize, setDotSize] = useState(128);
+  const [dotSize, setDotSize] = useState(64);
   const [color, setColor] = useState("#000000");
   const [rotation, setRotation] = useState(0);
   const [selectedDots, setSelectedDots] = useState([]);
   const [templateTile, setTemplateTile] = useState(undefined);
   const [printMode, setPrintMode] = useState(false);
-
-  const [grid, setGrid] = useState(initialValue);
 
   const { isVisible, openModal } = useContext(ModalContext);
 
@@ -67,10 +64,7 @@ export default function Home() {
       try {
         const parsed = JSON.parse(fileContents);
         if (!Array.isArray(parsed)) return;
-        if (parsed.length !== parsed[0].length) return;
-        if (parsed[0][0].length !== 2) return;
-        setSize(parsed.length);
-        setGrid(parsed);
+        setDots(parsed);
       } catch (err) {
         console.log(err);
       }
@@ -80,7 +74,7 @@ export default function Home() {
 
   const exportGrid = () => {
     const filename = "design.json";
-    const data = JSON.stringify(grid);
+    const data = JSON.stringify(dots);
     let element = document.createElement("a");
     element.setAttribute(
       "href",
@@ -93,21 +87,6 @@ export default function Home() {
     document.body.removeChild(element);
   };
 
-  const handleSizeChange = (value) => {
-    setSize(value);
-    setGrid((oldGrid) => {
-      const newGrid = generateGrid(value);
-      oldGrid.forEach((row, y) => {
-        row.forEach((cell, x) => {
-          if (newGrid.length <= y) return;
-          if (newGrid[y].length <= x) return;
-          newGrid[y][x] = cell;
-        });
-      });
-      return newGrid;
-    });
-  };
-
   const handleDotSizeChange = (value) => {
     setDotSize(value);
   };
@@ -115,6 +94,15 @@ export default function Home() {
   // MODIFY DOTS
   const updateColor = (value) => {
     setColor(value);
+    setDots((oldValue) => {
+      return oldValue.map((dot, i) => {
+        if (selectedDots.includes(i)) {
+          dot.color = value;
+        }
+        return dot;
+      });
+    });
+    toggleSelected(undefined);
   };
 
   const rotateDot = (dir = 1) => {
@@ -163,7 +151,7 @@ export default function Home() {
     return () => {
       document.removeEventListener("keydown", generateListeners);
     };
-  }, [selectedDots]);
+  }, [selectedDots, dots]);
 
   useEffect(() => {
     if (printMode) setSelectedDots([]);
@@ -177,7 +165,6 @@ export default function Home() {
       </h1>
       <Canvas
         dotSize={dotSize}
-        size={size}
         dots={dots}
         addDot={addDot}
         removeDot={removeDot}
@@ -191,8 +178,6 @@ export default function Home() {
       <Controllers
         templateTile={templateTile}
         setTemplateTile={setTemplateTile}
-        size={size}
-        handleSizeChange={handleSizeChange}
         dotSize={dotSize}
         handleDotSizeChange={handleDotSizeChange}
         color={color}

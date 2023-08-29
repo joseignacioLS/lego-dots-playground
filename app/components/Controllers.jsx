@@ -1,20 +1,19 @@
 import React, { useContext, useEffect } from "react";
 import styles from "./Controllers.module.scss";
-import Dot from "./Dot";
 import { ModalContext } from "../context/modal";
 import { colors } from "../data/data";
-import { curveCorner, digglet, rectangle, square } from "../data/dots";
+import { circle, curveCorner, digglet, rectangle, square } from "../data/dots";
+import Miniature from "./Miniature";
 
 const Controllers = ({
   templateTile,
   setTemplateTile,
-  size,
-  handleSizeChange,
   dotSize,
   handleDotSizeChange,
   color,
   setColor,
   deleteDot,
+  rotateDot,
   loadGrid,
   exportGrid,
   printMode,
@@ -38,23 +37,6 @@ const Controllers = ({
       {!printMode && (
         <>
           <div className={styles.managing}>
-            <label className={styles.labelAndButtons}>
-              Board Size
-              <div>
-                <button onClick={(e) => handleSizeChange(size - 1)}>-</button>
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: "2rem",
-                    margin: "0 .5rem",
-                    textAlign: "center",
-                  }}
-                >
-                  {size}
-                </span>
-                <button onClick={(e) => handleSizeChange(size + 1)}>+</button>
-              </div>
-            </label>
             <label className={styles.labelAndButtons}>
               Dot Size
               <div>
@@ -86,20 +68,28 @@ const Controllers = ({
               >
                 👆
               </div>
-              {[square, curveCorner, rectangle, digglet].map((template, i) => {
-                return (
-                  <div
-                    key={i}
-                    className={`${styles.cell} ${
-                      templateTile === i && styles.cellSelected
-                    }`}
-                    style={{ border: "1px solid black" }}
-                    onClick={() => setTemplateTile(template)}
-                  >
-                    {i}
-                  </div>
-                );
-              })}
+              {[square, curveCorner, rectangle, digglet, circle].map(
+                (template, i) => {
+                  return (
+                    <div
+                      key={i}
+                      className={`${styles.cell} ${
+                        templateTile === template && styles.cellSelected
+                      }`}
+                      style={{ border: "1px solid black" }}
+                      onClick={() => setTemplateTile(template)}
+                    >
+                      <Miniature
+                        template={template}
+                        color={color}
+                        size={32}
+                        w={template.size[0]}
+                        h={template.size[1]}
+                      />
+                    </div>
+                  );
+                }
+              )}
             </div>
             <div className={styles.templateColors}>
               {colors.map((ccolor) => {
@@ -121,6 +111,9 @@ const Controllers = ({
             </div>
             <div className={styles.actions}>
               <button onClick={deleteDot}>Delete</button>
+            </div>
+            <div className={styles.actions}>
+              <button onClick={() => rotateDot(1)}>Rotate</button>
             </div>
           </div>
           <div className={styles.loadOptions}>
