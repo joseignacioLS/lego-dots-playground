@@ -10,6 +10,7 @@ export const drawOnCanvas = (
 ) => {
   ctx.fillStyle = color;
   ctx.beginPath();
+  console.log(startPosition, path)
   const rotationPoint = [
     startPosition[0] + path.center[0] * scale,
     startPosition[1] + path.center[1] * scale,

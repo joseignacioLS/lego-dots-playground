@@ -47,7 +47,6 @@ export const rectangle = {
 
 export const curveCorner = {
   center: [0.5, 0.5],
-
   start: [0, 0],
   size: [1, 1],
   paths: [
