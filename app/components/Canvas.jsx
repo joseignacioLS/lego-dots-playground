@@ -33,6 +33,7 @@ const Canvas = ({
   const [drawnSize, setDrawnSize] = useState([8, 8]);
 
   const drawGrid = () => {
+    console.log("drawing grid")
     const gap = calculateGap(dotSize);
     for (let i = 0; i < Math.round(canvasSize / dotSize); i++) {
       for (let j = 0; j < Math.round(canvasSize / dotSize); j++) {
@@ -41,6 +42,7 @@ const Canvas = ({
         drawOnCanvas(ctx, [x, y], square, 0, "#DDD", dotSize);
       }
     }
+    console.log("grid ok")
   };
 
   const handleClick = () => {
@@ -137,6 +139,7 @@ const Canvas = ({
   };
 
   const drawDots = (dotSize) => {
+    console.log("drawing dots")
     dots.forEach((dot, i) => {
       drawOnCanvas(
         ctx,
@@ -147,6 +150,7 @@ const Canvas = ({
         dotSize
       );
     });
+    console.log("dots ok")
   };
 
   useEffect(() => {
@@ -251,6 +255,7 @@ const Canvas = ({
       collision: template.collision[rotation],
     });
     setIsCollision(index);
+    console.log("drawing temp")
     drawOnCanvas(
       ctx,
       mousePosition,
@@ -259,6 +264,7 @@ const Canvas = ({
       isCollision > -1 ? "#F00" : color,
       dotSize
     );
+    console.log("temp ok")
   }, [mousePosition, template, color, rotation, printMode, selectedDots]);
 
   useEffect(() => {
