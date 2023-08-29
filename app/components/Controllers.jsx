@@ -2,10 +2,10 @@ import React, { useContext, useEffect } from "react";
 import styles from "./Controllers.module.scss";
 import { ModalContext } from "../context/modal";
 import { colors } from "../data/data";
-import { circle, curveCorner, digglet, rectangle, square } from "../data/dots";
+import { circle, curve3x3, curveCorner, digglet, rectangle, square } from "../data/dots";
 import Miniature from "./Miniature";
 
-const templates = [square, curveCorner, digglet, circle, rectangle];
+const templates = [square, curveCorner, digglet, circle, rectangle, curve3x3];
 
 const Controllers = ({
   templateTile,

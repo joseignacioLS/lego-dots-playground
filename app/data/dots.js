@@ -1,3 +1,5 @@
+const GAP_FACTOR = 1.02;
+
 export const square = {
   center: [0.5, 0.5],
   start: [0, 0],
@@ -16,8 +18,8 @@ export const rectangle = {
   start: [0, 0],
   size: [2, 1],
   paths: [
-    { type: "line", coords: [2.04, 0] },
-    { type: "line", coords: [2.04, 1] },
+    { type: "line", coords: [2 * GAP_FACTOR, 0] },
+    { type: "line", coords: [2 * GAP_FACTOR, 1] },
     { type: "line", coords: [0, 1] },
     { type: "line", coords: [0, 0] },
   ],
@@ -76,6 +78,40 @@ export const circle = {
   start: [0, 0.5],
   paths: [{ type: "circle", coords: [0.5, 0.5, 0.5, 0, 2 * Math.PI] }],
   collision: { 0: [[1]], 90: [[1]], 180: [[1]], 270: [[1]] },
+};
+
+export const curve3x3 = {
+  center: [0.5, 0.5],
+  start: [0, 2],
+  size: [2, 2],
+  paths: [
+    { type: "arc", coords: [0, 0.9, 1.1, 0, 2 * GAP_FACTOR, 0] },
+    { type: "line", coords: [2 * GAP_FACTOR, 1] },
+    { type: "arc", coords: [1.45, 1, 1, 1.45, 1, 2 * GAP_FACTOR] },
+    { type: "line", coords: [0, 2 * GAP_FACTOR] },
+  ],
+  collision: {
+    0: [
+      [0, 0, 0],
+      [0, 1, 1],
+      [0, 1, 1],
+    ],
+    90: [
+      [0, 0, 0],
+      [1, 1, 0],
+      [1, 1, 0],
+    ],
+    180: [
+      [1, 1, 0],
+      [1, 1, 0],
+      [0, 0, 0],
+    ],
+    270: [
+      [0, 1, 1],
+      [0, 1, 1],
+      [0, 0, 0],
+    ],
+  },
 };
 
 export const angles = {
