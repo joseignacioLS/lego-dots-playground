@@ -59,6 +59,10 @@ export const CanvasContextProvider = ({ children }) => {
     });
   };
 
+  const selectAll = () => {
+    setSelectedDots([...new Array(dots.length)].map((_, i) => i));
+  };
+
   const handleDotSizeChange = (value) => {
     setDotSize(value);
   };
@@ -73,7 +77,9 @@ export const CanvasContextProvider = ({ children }) => {
       try {
         const parsed = JSON.parse(fileContents);
         if (!Array.isArray(parsed)) return;
-        setDots(parsed);
+        parsed.forEach((dot) => {
+          addDot(dot);
+        });
       } catch (err) {
         console.log(err);
       }
@@ -198,6 +204,8 @@ export const CanvasContextProvider = ({ children }) => {
       pasteSelection();
     } else if (e.key === "u") {
       setSelectedDots([]);
+    } else if (e.key === "a") {
+      selectAll();
     } else if (e.key === "ArrowRight") {
       moveDot(1, 0);
     } else if (e.key === "ArrowLeft") {

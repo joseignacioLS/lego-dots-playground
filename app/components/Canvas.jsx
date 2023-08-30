@@ -15,7 +15,7 @@ import {
 import { CanvasContext } from "../context/canvas";
 import { MouseContext } from "../context/mouse";
 
-const highRes = 128;
+const highRes = 64;
 
 const Canvas = ({}) => {
   const canvasref = useRef();
