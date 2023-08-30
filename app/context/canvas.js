@@ -1,7 +1,10 @@
 "use client";
 
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { colors } from "../data/data";
+import { coordsToPosition } from "../utils/space";
+import { MouseContext } from "./mouse";
+import { getDrawnSize } from "../utils/canvas";
 
 export const CanvasContext = createContext(null);
 
@@ -13,6 +16,8 @@ export const CanvasContextProvider = ({ children }) => {
   const [rotation, setRotation] = useState(0);
   const [template, setTemplate] = useState(undefined);
   const [printMode, setPrintMode] = useState(false);
+
+  const { mousePosition } = useContext(MouseContext);
 
   const addDot = (dot) => {
     setDots((oldValue) => [...oldValue, dot]);
@@ -175,7 +180,18 @@ export const CanvasContextProvider = ({ children }) => {
     } else if (e.key === "e") {
       setTemplate(undefined);
     } else if (e.key === "v") {
-      // lets paste
+      const mouse = coordsToPosition(...mousePosition, dotSize);
+      const copiedDots = dots.filter((dot, i) => selectedDots.includes(i));
+      const limits = getDrawnSize(copiedDots);
+      copiedDots.forEach((dot) => {
+        const ele = { ...dot };
+        ele.position = [
+          dot.position[0] - limits.minX + mouse[0],
+          dot.position[1] - limits.minY + mouse[1],
+        ];
+        placeDot(ele);
+      });
+      setSelectedDots([]);
     } else if (e.key === "ArrowRight") {
       moveDot(1, 0);
     } else if (e.key === "ArrowLeft") {
@@ -192,7 +208,7 @@ export const CanvasContextProvider = ({ children }) => {
     return () => {
       document.removeEventListener("keydown", generateListeners);
     };
-  }, [selectedDots, dots]);
+  }, [selectedDots, dots, mousePosition]);
 
   return (
     <CanvasContext.Provider

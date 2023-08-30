@@ -93,3 +93,32 @@ export const drawImageOnCanvas = (
   ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = "normal";
 };
+
+export const getDrawnSize = (dots) => {
+  const grid = [...new Array(200)].map((_) =>
+    [...new Array(200)].map((_) => 0)
+  );
+  const limits = {
+    minX: Infinity,
+    maxX: 0,
+    minY: Infinity,
+    maxY: 0,
+  };
+  for (let n = 0; n < dots.length; n++) {
+    const dot = dots[n];
+    const collisionMatrix = dot.dot.collision[dot.rotation];
+    for (let i = 0; i < collisionMatrix.length; i++) {
+      for (let j = 0; j < collisionMatrix[i].length; j++) {
+        if (collisionMatrix[i][j] === 0) continue;
+        const y = i + dot.position[1] - Math.floor(collisionMatrix.length / 2);
+        const x = j + dot.position[0] - Math.floor(collisionMatrix.length / 2);
+        if (y < 0 || y >= grid.length || x < 0 || x >= grid.length) continue;
+        if (x < limits.minX) limits.minX = x;
+        if (x > limits.maxX) limits.maxX = x;
+        if (y < limits.minY) limits.minY = y;
+        if (y > limits.maxY) limits.maxY = y;
+      }
+    }
+  }
+  return limits;
+};

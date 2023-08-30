@@ -6,8 +6,14 @@ import {
   coordsToPosition,
   positionToCoords,
 } from "../utils/space";
-import { cleanCanvas, drawImageOnCanvas, drawOnCanvas } from "../utils/canvas";
+import {
+  cleanCanvas,
+  drawImageOnCanvas,
+  drawOnCanvas,
+  getDrawnSize,
+} from "../utils/canvas";
 import { CanvasContext } from "../context/canvas";
+import { MouseContext } from "../context/mouse";
 
 const highRes = 128;
 
@@ -16,26 +22,23 @@ const Canvas = ({}) => {
   const [ctx, setCtx] = useState(undefined);
 
   const {
+    template,
     dots,
     dotSize,
-    template,
+    placeDot,
     color,
     rotation,
     printMode,
     selectedDots,
     toggleSelected,
-    placeDot,
     checkCollisions,
   } = useContext(CanvasContext);
 
+  const { mousePosition, updateMousePosition } = useContext(MouseContext);
+
   const [canvasSize, setCanvasSize] = useState(2014);
-  const [mousePosition, setMousePosition] = useState([0, 0]);
-  const [mouseMovTime, setMouseMovTime] = useState(new Date());
-
   const [isCollision, setIsCollision] = useState(-1);
-
   const [drawnSize, setDrawnSize] = useState([8, 8]);
-
   const [images, setImages] = useState([]);
 
   const handleClick = () => {
@@ -60,15 +63,7 @@ const Canvas = ({}) => {
   };
 
   const handleOver = (e) => {
-    const timeDiff = new Date().getTime() - mouseMovTime.getTime();
-    if (timeDiff < 10) return;
-    setMouseMovTime(new Date());
-    const rect = canvasref.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const position = coordsToPosition(x, y, dotSize);
-    const coords = positionToCoords(...position, dotSize);
-    setMousePosition(coords);
+    updateMousePosition(e, canvasref, dotSize);
   };
 
   const updateCanvas = () => {
@@ -126,37 +121,6 @@ const Canvas = ({}) => {
     }
   };
 
-  const getDrawnSize = () => {
-    const grid = [...new Array(200)].map((_) =>
-      [...new Array(200)].map((_) => 0)
-    );
-    const limits = {
-      minX: Infinity,
-      maxX: 0,
-      minY: Infinity,
-      maxY: 0,
-    };
-    for (let n = 0; n < dots.length; n++) {
-      const dot = dots[n];
-      const collisionMatrix = dot.dot.collision[dot.rotation];
-      for (let i = 0; i < collisionMatrix.length; i++) {
-        for (let j = 0; j < collisionMatrix[i].length; j++) {
-          if (collisionMatrix[i][j] === 0) continue;
-          const y =
-            i + dot.position[1] - Math.floor(collisionMatrix.length / 2);
-          const x =
-            j + dot.position[0] - Math.floor(collisionMatrix.length / 2);
-          if (y < 0 || y >= grid.length || x < 0 || x >= grid.length) continue;
-          if (x < limits.minX) limits.minX = x;
-          if (x > limits.maxX) limits.maxX = x;
-          if (y < limits.minY) limits.minY = y;
-          if (y > limits.maxY) limits.maxY = y;
-        }
-      }
-    }
-    return limits;
-  };
-
   const drawDots = (dotSize, margin = undefined) => {
     dots.forEach((dot, i) => {
       drawOnCanvas(
@@ -203,7 +167,7 @@ const Canvas = ({}) => {
   }, [template]);
 
   useEffect(() => {
-    if (printMode) setDrawnSize(getDrawnSize());
+    if (printMode) setDrawnSize(getDrawnSize(dots));
     if (!ctx || !mousePosition || printMode) return;
     updateCanvas();
     if (!template) return;
