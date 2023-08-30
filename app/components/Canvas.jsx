@@ -83,6 +83,11 @@ const Canvas = ({
     if (!ctx) return;
     cleanCanvas(ctx);
 
+    const highResSize = [
+      (highRes + calculateGap(highRes)) * (drawnSize.maxX - drawnSize.minX + 3),
+      (highRes + calculateGap(highRes)) * (drawnSize.maxY - drawnSize.minY + 3),
+    ];
+
     if (printMode) {
       drawImageOnCanvas(
         ctx,
@@ -90,10 +95,7 @@ const Canvas = ({
         [0, 0],
         [images[0].width, images[0].height],
         [0, 0],
-        [
-          (highRes + calculateGap(highRes)) * drawnSize[0],
-          (highRes + calculateGap(highRes)) * drawnSize[1],
-        ]
+        highResSize
       );
     }
     if (!printMode) {
@@ -102,10 +104,11 @@ const Canvas = ({
     if (printMode) {
       ctx.filter = "blur(1px)";
     }
-    drawDots(printMode ? highRes : dotSize);
-    if (printMode) {
-      ctx.filter = "none";
-    }
+    drawDots(
+      printMode ? highRes : dotSize,
+      printMode ? [drawnSize.minX, drawnSize.minY] : undefined
+    );
+    ctx.filter = "none";
     if (printMode) {
       drawImageOnCanvas(
         ctx,
@@ -113,10 +116,7 @@ const Canvas = ({
         [0, 0],
         [images[1].width, images[1].height],
         [0, 0],
-        [
-          (highRes + calculateGap(highRes)) * drawnSize[0],
-          (highRes + calculateGap(highRes)) * drawnSize[1],
-        ],
+        highResSize,
         0.8,
         "color-burn"
       );
@@ -162,10 +162,10 @@ const Canvas = ({
         }
       }
     }
-    return [limits.maxX + 2, limits.maxY + 2];
+    return limits;
   };
 
-  const drawDots = (dotSize) => {
+  const drawDots = (dotSize, margin = undefined) => {
     dots.forEach((dot, i) => {
       drawOnCanvas(
         ctx,
@@ -173,7 +173,8 @@ const Canvas = ({
         dot.dot,
         angles[dot.rotation],
         selectedDots.includes(i) && !printMode ? "#FF0" : dot.color,
-        dotSize
+        dotSize,
+        margin
       );
     });
   };
@@ -272,12 +273,14 @@ const Canvas = ({
       width={
         !printMode
           ? canvasSize
-          : (highRes + calculateGap(highRes)) * drawnSize[0]
+          : (highRes + calculateGap(highRes)) *
+            (drawnSize.maxX - drawnSize.minX + 3)
       }
       height={
         !printMode
           ? canvasSize
-          : (highRes + calculateGap(highRes)) * drawnSize[1]
+          : (highRes + calculateGap(highRes)) *
+            (drawnSize.maxY - drawnSize.minY + 3)
       }
       ref={canvasref}
       className={styles.canvas}
