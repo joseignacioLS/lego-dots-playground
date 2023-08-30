@@ -1,18 +1,17 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
-import { CanvasContext } from "./canvas";
+import { createContext, useState } from "react";
 import { coordsToPosition, positionToCoords } from "../utils/space";
 
 export const MouseContext = createContext(null);
 
 export const MouseContextProvider = ({ children }) => {
-  const [mousePosition, setMousePosition] = useState([0, 0]);
+  const [mousePosition, setMousePosition] = useState(undefined);
   const [mouseMovTime, setMouseMovTime] = useState(new Date());
 
   const updateMousePosition = (e, ref, dotSize) => {
     const timeDiff = new Date().getTime() - mouseMovTime.getTime();
-    if (timeDiff < 10) return;
+    if (timeDiff < 25) return;
     setMouseMovTime(new Date());
     const rect = ref.current.getBoundingClientRect();
     const x = e.clientX - rect.left;

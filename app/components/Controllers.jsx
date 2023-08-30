@@ -37,6 +37,7 @@ const Controllers = ({}) => {
       <label>
         <input
           type="checkbox"
+          checked={printMode}
           onChange={(e) => setPrintMode(e.currentTarget.checked)}
         ></input>
         Print Mode

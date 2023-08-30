@@ -1,0 +1,25 @@
+.title {
+  margin-bottom: 1rem;
+  font-size: 2rem;
+}
+
+.table {
+  border: 1px solid black;
+  th {
+    text-align: left;
+    border-bottom: 1px solid black;
+    font-size: 1.5rem;
+  }
+  th:first-child {
+    width: 100px;
+  }
+  th:nth-child(2) {
+    width: 300px;
+  }
+  td {
+    padding: 0.5rem 0.25rem;
+  }
+  tr:nth-child(2n) {
+    background-color: rgb(214, 214, 214);
+  }
+}

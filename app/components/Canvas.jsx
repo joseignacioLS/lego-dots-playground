@@ -15,7 +15,7 @@ import {
 import { CanvasContext } from "../context/canvas";
 import { MouseContext } from "../context/mouse";
 
-const highRes = 64;
+const canvasBaseSize = 2048;
 
 const Canvas = ({}) => {
   const canvasref = useRef();
@@ -36,9 +36,12 @@ const Canvas = ({}) => {
 
   const { mousePosition, updateMousePosition } = useContext(MouseContext);
 
-  const [canvasSize, setCanvasSize] = useState(2014);
+  const [canvasSize, setCanvasSize] = useState([
+    canvasBaseSize,
+    canvasBaseSize,
+  ]);
   const [isCollision, setIsCollision] = useState(-1);
-  const [drawnSize, setDrawnSize] = useState([8, 8]);
+  const [drawnSize, setDrawnSize] = useState({});
   const [images, setImages] = useState([]);
 
   const handleClick = () => {
@@ -70,9 +73,13 @@ const Canvas = ({}) => {
     if (!ctx) return;
     cleanCanvas(ctx);
 
+    const columns = drawnSize.maxX - drawnSize.minX + 3;
+    const rows = drawnSize.maxY - drawnSize.minY + 3;
+    const res = printMode ? canvasBaseSize / Math.max(columns, rows) : dotSize;
+
     const highResSize = [
-      (highRes + calculateGap(highRes)) * (drawnSize.maxX - drawnSize.minX + 3),
-      (highRes + calculateGap(highRes)) * (drawnSize.maxY - drawnSize.minY + 3),
+      (res + calculateGap(res)) * columns,
+      (res + calculateGap(res)) * rows,
     ];
 
     if (printMode) {
@@ -89,12 +96,9 @@ const Canvas = ({}) => {
       drawGrid();
     }
     if (printMode) {
-      ctx.filter = "blur(1px)";
+      ctx.filter = "blur(2px)";
     }
-    drawDots(
-      printMode ? highRes : dotSize,
-      printMode ? [drawnSize.minX, drawnSize.minY] : undefined
-    );
+    drawDots(res, printMode ? [drawnSize.minX, drawnSize.minY] : undefined);
     ctx.filter = "none";
     if (printMode) {
       drawImageOnCanvas(
@@ -112,8 +116,8 @@ const Canvas = ({}) => {
 
   const drawGrid = () => {
     const gap = calculateGap(dotSize);
-    for (let i = 0; i < Math.round(canvasSize / dotSize); i++) {
-      for (let j = 0; j < Math.round(canvasSize / dotSize); j++) {
+    for (let i = 0; i < Math.round(canvasSize[1] / dotSize); i++) {
+      for (let j = 0; j < Math.round(canvasSize[0] / dotSize); j++) {
         const x = j * (dotSize + gap);
         const y = i * (dotSize + gap);
         drawOnCanvas(ctx, [x, y], square, 0, "#DDD", dotSize);
@@ -136,8 +140,8 @@ const Canvas = ({}) => {
   };
 
   const resizeListener = () => {
-    const width = canvasref.current.getBoundingClientRect().width;
-    setCanvasSize(width);
+    const width = Math.floor(canvasref.current.getBoundingClientRect().width);
+    setCanvasSize([width, width]);
   };
 
   useEffect(() => {
@@ -150,8 +154,7 @@ const Canvas = ({}) => {
     );
     const ctxRef = canvasref.current.getContext("2d");
     setCtx(ctxRef);
-    const width = canvasref.current.getBoundingClientRect().width;
-    setCanvasSize(width);
+    resizeListener();
     window.addEventListener("resize", resizeListener);
     return () => window.removeEventListener("resize", resizeListener);
   }, []);
@@ -167,15 +170,36 @@ const Canvas = ({}) => {
   }, [template]);
 
   useEffect(() => {
-    if (printMode) setDrawnSize(getDrawnSize(dots));
-    if (!ctx || !mousePosition || printMode) return;
+    if (printMode) {
+      const newDrawnSize = getDrawnSize(dots);
+      setDrawnSize(newDrawnSize);
+      const columns = newDrawnSize.maxX - newDrawnSize.minX + 3;
+      const rows = newDrawnSize.maxY - newDrawnSize.minY + 3;
+      const res = 2048 / Math.max(columns, rows);
+      setCanvasSize([
+        (res + calculateGap(res)) * columns,
+        (res + calculateGap(res)) * rows,
+      ]);
+    } else {
+      resizeListener();
+    }
+  }, [printMode]);
+
+  useEffect(() => {
+    if (!ctx || !mousePosition) return;
+
     updateCanvas();
+
+    if (printMode) return;
+
     if (!template) return;
     const index = checkCollisions({
       position: coordsToPosition(...mousePosition, dotSize),
       collision: template.collision[rotation],
     });
+
     setIsCollision(index);
+
     drawOnCanvas(
       ctx,
       mousePosition,
@@ -184,22 +208,12 @@ const Canvas = ({}) => {
       isCollision > -1 ? "#F00" : color,
       dotSize
     );
-  }, [mousePosition, template, color, rotation, printMode, selectedDots]);
+  }, [mousePosition, template, color, rotation, selectedDots, canvasSize]);
 
   return (
     <canvas
-      width={
-        !printMode
-          ? canvasSize
-          : (highRes + calculateGap(highRes)) *
-            (drawnSize.maxX - drawnSize.minX + 3)
-      }
-      height={
-        !printMode
-          ? canvasSize
-          : (highRes + calculateGap(highRes)) *
-            (drawnSize.maxY - drawnSize.minY + 3)
-      }
+      width={canvasSize[0]}
+      height={canvasSize[1]}
       ref={canvasref}
       className={styles.canvas}
       onClick={handleClick}

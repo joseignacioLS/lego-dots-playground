@@ -202,10 +202,14 @@ export const CanvasContextProvider = ({ children }) => {
       setTemplate(undefined);
     } else if (e.key === "v") {
       pasteSelection();
-    } else if (e.key === "u") {
+    } else if (e.key === "f") {
       setSelectedDots([]);
     } else if (e.key === "a") {
       selectAll();
+    } else if (e.key === "d") {
+      setPrintMode((old) => !old);
+    } else if (e.key === "s") {
+      exportGrid();
     } else if (e.key === "ArrowRight") {
       moveDot(1, 0);
     } else if (e.key === "ArrowLeft") {

@@ -3,16 +3,11 @@
   max-width: 100%;
   height: 100vh;
   max-height: 100vh;
-  grid-template-columns: 1fr;
-  grid-template-rows: auto 1fr auto;
 
   aspect-ratio: 4 / 3;
   margin: auto;
-
-  @media (min-width: 600px) {
-    grid-template-columns: 1fr auto;
-    grid-template-rows: auto 1fr;
-  }
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto 1fr;
 
   h1 {
     width: 100%;
