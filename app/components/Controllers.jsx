@@ -2,7 +2,14 @@ import React, { useContext, useEffect } from "react";
 import styles from "./Controllers.module.scss";
 import { ModalContext } from "../context/modal";
 import { colors } from "../data/data";
-import { circle, curve3x3, curveCorner, digglet, rectangle, square } from "../data/dots";
+import {
+  circle,
+  curve3x3,
+  curveCorner,
+  digglet,
+  rectangle,
+  square,
+} from "../data/dots";
 import Miniature from "./Miniature";
 
 const templates = [square, curveCorner, digglet, circle, rectangle, curve3x3];
@@ -20,6 +27,7 @@ const Controllers = ({
   exportGrid,
   printMode,
   setPrintMode,
+  removeAllDots,
 }) => {
   const { openModal, hideModal } = useContext(ModalContext);
 
@@ -112,9 +120,8 @@ const Controllers = ({
             </div>
             <div className={styles.actions}>
               <button onClick={deleteDot}>Delete</button>
-            </div>
-            <div className={styles.actions}>
               <button onClick={() => rotateDot(1)}>Rotate</button>
+              <button onClick={removeAllDots}>Reset</button>
             </div>
           </div>
           <div className={styles.loadOptions}>

@@ -6,16 +6,7 @@ import Controllers from "./components/Controllers";
 import { ModalContext } from "./context/modal";
 import Modal from "./components/Modal";
 import Instructions from "./components/Instructions";
-import { colors } from "./data/data";
 import Canvas from "./components/Canvas";
-
-const generateGrid = (value) => {
-  return [...new Array(value)].map((_) => {
-    return [...new Array(value)].map((_) => [0, 0, colors[0]]);
-  });
-};
-
-const initialValue = generateGrid(8);
 
 export default function Home() {
   const [dots, setDots] = useState([]);
@@ -44,6 +35,10 @@ export default function Home() {
     });
   };
 
+  const removeAllDots = () => {
+    setDots([]);
+  };
+
   const toggleSelected = (dot) => {
     if (dot === undefined) return setSelectedDots([]);
     setSelectedDots((oldValue) => {
@@ -51,8 +46,6 @@ export default function Home() {
       return [...oldValue, dot];
     });
   };
-
-  // GRID
 
   const loadGrid = () => {
     const fileInput = document.querySelector("#file");
@@ -184,6 +177,7 @@ export default function Home() {
         setColor={updateColor}
         rotateDot={rotateDot}
         deleteDot={removeSelectedDots}
+        removeAllDots={removeAllDots}
         loadGrid={loadGrid}
         exportGrid={exportGrid}
         printMode={printMode}

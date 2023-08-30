@@ -6,18 +6,18 @@ import {
   coordsToPosition,
   positionToCoords,
 } from "../utils/space";
-import { drawOnCanvas } from "../utils/canvas";
+import { cleanCanvas, drawImageOnCanvas, drawOnCanvas } from "../utils/canvas";
 
 const highRes = 128;
 
 const Canvas = ({
-  dotSize = 128,
-  template = undefined,
-  dots = [],
+  dotSize,
+  template,
+  dots,
   addDot,
   removeDot,
-  rotation = 0,
-  color = "#FF0",
+  rotation,
+  color,
   printMode,
   selectedDots,
   toggleSelected,
@@ -27,21 +27,13 @@ const Canvas = ({
 
   const [canvasSize, setCanvasSize] = useState(2014);
   const [mousePosition, setMousePosition] = useState([0, 0]);
+  const [mouseMovTime, setMouseMovTime] = useState(new Date());
 
   const [isCollision, setIsCollision] = useState(-1);
 
   const [drawnSize, setDrawnSize] = useState([8, 8]);
 
-  const drawGrid = () => {
-    const gap = calculateGap(dotSize);
-    for (let i = 0; i < Math.round(canvasSize / dotSize); i++) {
-      for (let j = 0; j < Math.round(canvasSize / dotSize); j++) {
-        const x = j * (dotSize + gap);
-        const y = i * (dotSize + gap);
-        drawOnCanvas(ctx, [x, y], square, 0, "#DDD", dotSize);
-      }
-    }
-  };
+  const [images, setImages] = useState([]);
 
   const handleClick = () => {
     if (!mousePosition) return;
@@ -64,7 +56,20 @@ const Canvas = ({
     }
   };
 
+  const handleOver = (e) => {
+    const timeDiff = new Date().getTime() - mouseMovTime.getTime();
+    if (timeDiff < 10) return;
+    setMouseMovTime(new Date());
+    const rect = canvasref.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const position = coordsToPosition(x, y, dotSize);
+    const coords = positionToCoords(...position, dotSize);
+    setMousePosition(coords);
+  };
+
   const placeDot = (dot) => {
+    // TODO: Check multiple collisions
     const index = checkCollisions({
       position: dot.position,
       collision: dot.dot.collision[dot.rotation],
@@ -74,90 +79,59 @@ const Canvas = ({
     addDot(dot);
   };
 
-  const handleOver = (e) => {
-    const rect = canvasref.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const position = coordsToPosition(x, y, dotSize);
-    const coords = positionToCoords(...position, dotSize);
-    setMousePosition(coords);
-  };
-
   const updateCanvas = () => {
     if (!ctx) return;
-    if (printMode) {
-      cleanCanvas();
-      const image = document.createElement("img");
-      image.onload = () => {
-        ctx.drawImage(
-          image,
-          0,
-          0,
-          image.width,
-          image.height,
-          0,
-          0,
-          (highRes + calculateGap(highRes)) * drawnSize[0],
-          (highRes + calculateGap(highRes)) * drawnSize[1]
-        );
+    cleanCanvas(ctx);
 
-        ctx.filter = "blur(1px)";
-        drawDots(highRes);
-        ctx.filter = "none";
-        
-        const image2 = document.createElement("img");
-        image2.onload = () => {
-          ctx.globalAlpha = 0.8;
-          ctx.globalCompositeOperation = "color-burn";
-          ctx.drawImage(
-            image2,
-            0,
-            0,
-            image2.width,
-            image2.height,
-            0,
-            0,
-            (highRes + calculateGap(highRes)) * drawnSize[0],
-            (highRes + calculateGap(highRes)) * drawnSize[1]
-          );
-          ctx.globalAlpha = 1;
-          ctx.globalCompositeOperation = "normal";
-        };
-        image2.src = "/print.jpg";
-      };
-      image.src = "/paper.jpg";
-    } else {
-      cleanCanvas();
+    if (printMode) {
+      drawImageOnCanvas(
+        ctx,
+        images[0],
+        [0, 0],
+        [images[0].width, images[0].height],
+        [0, 0],
+        [
+          (highRes + calculateGap(highRes)) * drawnSize[0],
+          (highRes + calculateGap(highRes)) * drawnSize[1],
+        ]
+      );
+    }
+    if (!printMode) {
       drawGrid();
-      drawDots(dotSize);
+    }
+    if (printMode) {
+      ctx.filter = "blur(1px)";
+    }
+    drawDots(printMode ? highRes : dotSize);
+    if (printMode) {
+      ctx.filter = "none";
+    }
+    if (printMode) {
+      drawImageOnCanvas(
+        ctx,
+        images[1],
+        [0, 0],
+        [images[1].width, images[1].height],
+        [0, 0],
+        [
+          (highRes + calculateGap(highRes)) * drawnSize[0],
+          (highRes + calculateGap(highRes)) * drawnSize[1],
+        ],
+        0.8,
+        "color-burn"
+      );
     }
   };
 
-  const cleanCanvas = () => {
-    ctx.clearRect(0, 0, 5000, 5000);
-  };
-
-  const drawDots = (dotSize) => {
-    dots.forEach((dot, i) => {
-      drawOnCanvas(
-        ctx,
-        positionToCoords(...dot.position, dotSize),
-        dot.dot,
-        angles[dot.rotation],
-        selectedDots.includes(i) && !printMode ? "#FF0" : dot.color,
-        dotSize
-      );
-    });
-  };
-
-  useEffect(() => {
-    if (!ctx) return;
-    updateCanvas();
-  }, [ctx, canvasSize, dotSize, dots]);
-
-  const resizeListener = () => {
-    const width = canvasref.current.getBoundingClientRect().width;
-    setCanvasSize(width);
+  const drawGrid = () => {
+    const gap = calculateGap(dotSize);
+    for (let i = 0; i < Math.round(canvasSize / dotSize); i++) {
+      for (let j = 0; j < Math.round(canvasSize / dotSize); j++) {
+        const x = j * (dotSize + gap);
+        const y = i * (dotSize + gap);
+        drawOnCanvas(ctx, [x, y], square, 0, "#DDD", dotSize);
+      }
+    }
   };
 
   const getDrawnSize = () => {
@@ -191,14 +165,18 @@ const Canvas = ({
     return [limits.maxX + 2, limits.maxY + 2];
   };
 
-  useEffect(() => {
-    const ctxRef = canvasref.current.getContext("2d");
-    setCtx(ctxRef);
-    const width = canvasref.current.getBoundingClientRect().width;
-    setCanvasSize(width);
-    window.addEventListener("resize", resizeListener);
-    return () => window.removeEventListener("resize", resizeListener);
-  }, []);
+  const drawDots = (dotSize) => {
+    dots.forEach((dot, i) => {
+      drawOnCanvas(
+        ctx,
+        positionToCoords(...dot.position, dotSize),
+        dot.dot,
+        angles[dot.rotation],
+        selectedDots.includes(i) && !printMode ? "#FF0" : dot.color,
+        dotSize
+      );
+    });
+  };
 
   const checkCollisions = ({ position, collision }) => {
     const grid = [...new Array(200)].map((_) =>
@@ -238,12 +216,39 @@ const Canvas = ({
     return -1;
   };
 
+  const resizeListener = () => {
+    const width = canvasref.current.getBoundingClientRect().width;
+    setCanvasSize(width);
+  };
+
+  useEffect(() => {
+    setImages(
+      ["/paper.jpg", "print.jpg"].map((img) => {
+        const dom = document.createElement("img");
+        dom.src = img;
+        return dom;
+      })
+    );
+    const ctxRef = canvasref.current.getContext("2d");
+    setCtx(ctxRef);
+    const width = canvasref.current.getBoundingClientRect().width;
+    setCanvasSize(width);
+    window.addEventListener("resize", resizeListener);
+    return () => window.removeEventListener("resize", resizeListener);
+  }, []);
+
+  useEffect(() => {
+    if (!ctx) return;
+    updateCanvas();
+  }, [ctx, canvasSize, drawnSize, dotSize, dots]);
+
   useEffect(() => {
     if (template) toggleSelected(undefined);
     if (!template) setIsCollision(-1);
   }, [template]);
 
   useEffect(() => {
+    if (printMode) setDrawnSize(getDrawnSize());
     if (!ctx || !mousePosition || printMode) return;
     updateCanvas();
     if (!template) return;
@@ -261,14 +266,6 @@ const Canvas = ({
       dotSize
     );
   }, [mousePosition, template, color, rotation, printMode, selectedDots]);
-
-  useEffect(() => {
-    if (printMode) {
-      const size = getDrawnSize();
-      setDrawnSize(size);
-    }
-    setTimeout(updateCanvas, 500);
-  }, [printMode]);
 
   return (
     <canvas

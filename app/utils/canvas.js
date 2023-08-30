@@ -1,5 +1,9 @@
 import { rotatePoint } from "./space";
 
+export const cleanCanvas = (ctx) => {
+  ctx.clearRect(0, 0, 5000, 5000);
+};
+
 export const drawOnCanvas = (
   ctx,
   startPosition,
@@ -59,4 +63,21 @@ export const drawOnCanvas = (
     }
   });
   ctx.fill();
+};
+
+export const drawImageOnCanvas = (
+  ctx,
+  image,
+  origin,
+  size,
+  dOrigin,
+  dSize,
+  alpha = 1,
+  mode = "normal"
+) => {
+  ctx.globalAlpha = alpha;
+  ctx.globalCompositeOperation = mode;
+  ctx.drawImage(image, ...origin, ...size, ...dOrigin, ...dSize);
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = "normal";
 };
