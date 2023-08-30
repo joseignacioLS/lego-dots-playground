@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import styles from "./Canvas.module.scss";
 import { angles, square } from "../data/dots";
 import {
@@ -7,23 +7,26 @@ import {
   positionToCoords,
 } from "../utils/space";
 import { cleanCanvas, drawImageOnCanvas, drawOnCanvas } from "../utils/canvas";
+import { CanvasContext } from "../context/canvas";
 
 const highRes = 128;
 
-const Canvas = ({
-  dotSize,
-  template,
-  dots,
-  addDot,
-  removeDot,
-  rotation,
-  color,
-  printMode,
-  selectedDots,
-  toggleSelected,
-}) => {
+const Canvas = ({}) => {
   const canvasref = useRef();
   const [ctx, setCtx] = useState(undefined);
+
+  const {
+    dots,
+    dotSize,
+    template,
+    color,
+    rotation,
+    printMode,
+    selectedDots,
+    toggleSelected,
+    placeDot,
+    checkCollisions,
+  } = useContext(CanvasContext);
 
   const [canvasSize, setCanvasSize] = useState(2014);
   const [mousePosition, setMousePosition] = useState([0, 0]);
@@ -66,17 +69,6 @@ const Canvas = ({
     const position = coordsToPosition(x, y, dotSize);
     const coords = positionToCoords(...position, dotSize);
     setMousePosition(coords);
-  };
-
-  const placeDot = (dot) => {
-    // TODO: Check multiple collisions
-    const index = checkCollisions({
-      position: dot.position,
-      collision: dot.dot.collision[dot.rotation],
-    });
-    if (index === Infinity) return;
-    if (index > -1) removeDot([index]);
-    addDot(dot);
   };
 
   const updateCanvas = () => {
@@ -177,44 +169,6 @@ const Canvas = ({
         margin
       );
     });
-  };
-
-  const checkCollisions = ({ position, collision }) => {
-    const grid = [...new Array(200)].map((_) =>
-      [...new Array(200)].map((_) => 0)
-    );
-
-    const collisionMatrix = collision;
-    for (let i = 0; i < collisionMatrix.length; i++) {
-      for (let j = 0; j < collisionMatrix[i].length; j++) {
-        if (collisionMatrix[i][j] === 0) continue;
-        const y = i + position[1] - Math.floor(collisionMatrix.length / 2);
-        const x = j + position[0] - Math.floor(collisionMatrix.length / 2);
-        if (y < 0 || y >= grid.length || x < 0 || x >= grid.length)
-          return Infinity;
-        grid[i + position[1] - Math.floor(collisionMatrix.length / 2)][
-          j + position[0] - Math.floor(collisionMatrix.length / 2)
-        ] = 1;
-      }
-    }
-    for (let n = 0; n < dots.length; n++) {
-      const dot = dots[n];
-      const collisionMatrix = dot.dot.collision[dot.rotation];
-      for (let i = 0; i < collisionMatrix.length; i++) {
-        for (let j = 0; j < collisionMatrix[i].length; j++) {
-          if (collisionMatrix[i][j] === 0) continue;
-          const y =
-            i + dot.position[1] - Math.floor(collisionMatrix.length / 2);
-          const x =
-            j + dot.position[0] - Math.floor(collisionMatrix.length / 2);
-          if (y < 0 || y >= grid.length || x < 0 || x >= grid.length) continue;
-          if (grid[y][x] + collisionMatrix[i][j] > 1) {
-            return n;
-          }
-        }
-      }
-    }
-    return -1;
   };
 
   const resizeListener = () => {

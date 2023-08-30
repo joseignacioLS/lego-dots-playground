@@ -18,7 +18,6 @@ export const drawOnCanvas = (
   const base = margin
     ? [-(margin[0] - 1) * scale * 1.04, -(margin[1] - 1) * scale * 1.04]
     : [0, 0];
-
   const rotationPoint = [
     startPosition[0] + path.center[0] * scale,
     startPosition[1] + path.center[1] * scale,

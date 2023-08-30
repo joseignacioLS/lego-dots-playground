@@ -1,3 +1,4 @@
+import { CanvasContextProvider } from "./context/canvas";
 import { ModalContextProvider } from "./context/modal";
 import "./globals.scss";
 import { Inter } from "next/font/google";
@@ -13,7 +14,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <ModalContextProvider>{children}</ModalContextProvider>
+        <CanvasContextProvider>
+          <ModalContextProvider>{children}</ModalContextProvider>
+        </CanvasContextProvider>
       </body>
     </html>
   );

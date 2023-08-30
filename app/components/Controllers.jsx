@@ -11,29 +11,26 @@ import {
   square,
 } from "../data/dots";
 import Miniature from "./Miniature";
+import { CanvasContext } from "../context/canvas";
 
 const templates = [square, curveCorner, digglet, circle, rectangle, curve3x3];
 
-const Controllers = ({
-  templateTile,
-  setTemplateTile,
-  dotSize,
-  handleDotSizeChange,
-  color,
-  setColor,
-  deleteDot,
-  rotateDot,
-  loadGrid,
-  exportGrid,
-  printMode,
-  setPrintMode,
-  removeAllDots,
-}) => {
+const Controllers = ({}) => {
   const { openModal, hideModal } = useContext(ModalContext);
-
-  useEffect(() => {
-    setColor(colors[0]);
-  }, []);
+  const {
+    removeAllDots,
+    removeSelectedDots,
+    handleDotSizeChange,
+    printMode,
+    dotSize,
+    template,
+    setTemplate,
+    color,
+    setColor,
+    exportGrid,
+    loadGrid,
+    setPrintMode,
+  } = useContext(CanvasContext);
 
   return (
     <section className={styles.controls}>
@@ -72,25 +69,25 @@ const Controllers = ({
             <div className={styles.templateTiles}>
               <div
                 className={`${styles.cell} ${
-                  templateTile === undefined && styles.cellSelected
+                  template === undefined && styles.cellSelected
                 }`}
-                onClick={() => setTemplateTile(undefined)}
+                onClick={() => setTemplate(undefined)}
               >
                 👆
               </div>
-              {templates.map((template, i) => {
-                if (!template?.size) return <>X</>;
+              {templates.map((ttemplate, i) => {
+                if (!ttemplate?.size) return <>X</>;
                 return (
                   <div
                     key={i}
                     className={`${styles.cell} ${
-                      templateTile === template && styles.cellSelected
+                      ttemplate === template && styles.cellSelected
                     }`}
                     style={{ border: "1px solid black" }}
-                    onClick={() => setTemplateTile(template)}
+                    onClick={() => setTemplate(ttemplate)}
                   >
                     <Miniature
-                      template={template}
+                      template={ttemplate}
                       color={color}
                       size={32}
                       w={template?.size?.[0]}
@@ -119,7 +116,7 @@ const Controllers = ({
               })}
             </div>
             <div className={styles.actions}>
-              <button onClick={deleteDot}>Delete</button>
+              <button onClick={removeSelectedDots}>Delete</button>
               <button onClick={() => rotateDot(1)}>Rotate</button>
               <button onClick={removeAllDots}>Reset</button>
             </div>
