@@ -119,11 +119,12 @@ export const CanvasContextProvider = ({ children }) => {
   };
 
   const moveDot = (dX = 0, dY = 0) => {
-    selectedDots.forEach((dot) => {
-      dots[dot].position = [
-        dots[dot].position[0] + dX,
-        dots[dot].position[1] + dY,
-      ];
+    setDots((oldDots) => {
+      return oldDots.map((dot, i) => {
+        if (!selectedDots.includes(i)) return dot;
+        dot.position = [dot.position[0] + dX, dot.position[1] + dY];
+        return dot;
+      });
     });
   };
 
@@ -165,6 +166,20 @@ export const CanvasContextProvider = ({ children }) => {
     return -1;
   };
 
+  const pasteSelection = () => {
+    const mouse = coordsToPosition(...mousePosition, dotSize);
+    const copiedDots = dots.filter((dot, i) => selectedDots.includes(i));
+    const limits = getDrawnSize(copiedDots);
+    copiedDots.forEach((dot) => {
+      const ele = { ...dot };
+      ele.position = [
+        dot.position[0] - limits.minX + mouse[0],
+        dot.position[1] - limits.minY + mouse[1],
+      ];
+      placeDot(ele);
+    });
+  };
+
   useEffect(() => {
     if (printMode) setSelectedDots([]);
   }, []);
@@ -180,17 +195,8 @@ export const CanvasContextProvider = ({ children }) => {
     } else if (e.key === "e") {
       setTemplate(undefined);
     } else if (e.key === "v") {
-      const mouse = coordsToPosition(...mousePosition, dotSize);
-      const copiedDots = dots.filter((dot, i) => selectedDots.includes(i));
-      const limits = getDrawnSize(copiedDots);
-      copiedDots.forEach((dot) => {
-        const ele = { ...dot };
-        ele.position = [
-          dot.position[0] - limits.minX + mouse[0],
-          dot.position[1] - limits.minY + mouse[1],
-        ];
-        placeDot(ele);
-      });
+      pasteSelection();
+    } else if (e.key === "u") {
       setSelectedDots([]);
     } else if (e.key === "ArrowRight") {
       moveDot(1, 0);
@@ -208,7 +214,7 @@ export const CanvasContextProvider = ({ children }) => {
     return () => {
       document.removeEventListener("keydown", generateListeners);
     };
-  }, [selectedDots, dots, mousePosition]);
+  }, [selectedDots, dots, dotSize, mousePosition]);
 
   return (
     <CanvasContext.Provider

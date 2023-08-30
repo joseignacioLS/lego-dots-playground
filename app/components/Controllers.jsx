@@ -26,7 +26,7 @@ const Controllers = ({}) => {
     template,
     setTemplate,
     color,
-    setColor,
+    updateColor,
     exportGrid,
     loadGrid,
     setPrintMode,
@@ -90,8 +90,8 @@ const Controllers = ({}) => {
                       template={ttemplate}
                       color={color}
                       size={32}
-                      w={template?.size?.[0]}
-                      h={template?.size?.[1]}
+                      w={ttemplate?.size?.[0]}
+                      h={ttemplate?.size?.[1]}
                     />
                   </div>
                 );
@@ -103,7 +103,7 @@ const Controllers = ({}) => {
                   <div
                     key={ccolor}
                     onClick={(e) => {
-                      setColor(ccolor);
+                      updateColor(ccolor);
                     }}
                     style={{
                       width: "2rem",
