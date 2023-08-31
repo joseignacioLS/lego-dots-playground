@@ -30,6 +30,8 @@ const Controllers = ({}) => {
     exportGrid,
     loadGrid,
     setPrintMode,
+    limits,
+    updateLimits,
   } = useContext(CanvasContext);
 
   return (
@@ -67,6 +69,82 @@ const Controllers = ({}) => {
                 </button>
               </div>
             </label>
+            <div className={styles.oneLine}>
+              <label className={styles.labelAndButtons}>
+                Left Limit
+                <div>
+                  <button onClick={(e) => updateLimits("minX", -1)}>-</button>
+                  <span
+                    style={{
+                      display: "inline-block",
+                      width: "2rem",
+                      margin: "0 .5rem",
+                      textAlign: "center",
+                    }}
+                  >
+                    {limits.minX}
+                  </span>
+
+                  <button onClick={(e) => updateLimits("minX", 1)}>+</button>
+                </div>
+              </label>
+              <label className={styles.labelAndButtons}>
+                Right Limit
+                <div>
+                  <button onClick={(e) => updateLimits("maxX", -1)}>-</button>
+                  <span
+                    style={{
+                      display: "inline-block",
+                      width: "2rem",
+                      margin: "0 .5rem",
+                      textAlign: "center",
+                    }}
+                  >
+                    {limits.maxX}
+                  </span>
+
+                  <button onClick={(e) => updateLimits("maxX", 1)}>+</button>
+                </div>
+              </label>
+            </div>
+            <div className={styles.oneLine}>
+              <label className={styles.labelAndButtons}>
+                Top Limit
+                <div>
+                  <button onClick={(e) => updateLimits("minY", -1)}>-</button>
+                  <span
+                    style={{
+                      display: "inline-block",
+                      width: "2rem",
+                      margin: "0 .5rem",
+                      textAlign: "center",
+                    }}
+                  >
+                    {limits.minY}
+                  </span>
+
+                  <button onClick={(e) => updateLimits("minY", 1)}>+</button>
+                </div>
+              </label>
+              <label className={styles.labelAndButtons}>
+                Bottom Limit
+                <div>
+                  <button onClick={(e) => updateLimits("maxY", -1)}>-</button>
+                  <span
+                    style={{
+                      display: "inline-block",
+                      width: "2rem",
+                      margin: "0 .5rem",
+                      textAlign: "center",
+                    }}
+                  >
+                    {limits.maxY}
+                  </span>
+
+                  <button onClick={(e) => updateLimits("maxY", 1)}>+</button>
+                </div>
+              </label>
+            </div>
             <div className={styles.templateTiles}>
               <div
                 className={`${styles.cell} ${

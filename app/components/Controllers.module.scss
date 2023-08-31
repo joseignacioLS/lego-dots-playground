@@ -1,7 +1,7 @@
 .controls {
   z-index: 10;
 
-  width: 300px;
+  width: 450px;
 
   display: flex;
   flex-direction: column;
@@ -79,4 +79,14 @@
 .labelAndButtons {
   display: flex;
   flex-direction: column;
+  div {
+    display: flex;
+    align-items: center;
+  }
+}
+
+
+.oneLine {
+  display: flex;
+  gap: .25rem;
 }

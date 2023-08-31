@@ -16,6 +16,20 @@ export const CanvasContextProvider = ({ children }) => {
   const [rotation, setRotation] = useState(0);
   const [template, setTemplate] = useState(undefined);
   const [printMode, setPrintMode] = useState(false);
+  const [limits, setLimits] = useState({
+    minX: 0,
+    maxX: 10,
+    minY: 0,
+    maxY: 10
+  })
+
+  const updateLimits = (key, delta) => {
+    if (!(key in limits)) return
+
+    setLimits(oldValue => {
+      return { ...oldValue, [key]: oldValue[key] + delta }
+    })
+  }
 
   const { mousePosition } = useContext(MouseContext);
 
@@ -272,6 +286,8 @@ export const CanvasContextProvider = ({ children }) => {
         loadGrid,
         exportGrid,
         checkCollisions,
+        limits,
+        updateLimits
       }}
     >
       {children}

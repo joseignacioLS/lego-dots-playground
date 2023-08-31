@@ -6,12 +6,7 @@ import {
   coordsToPosition,
   positionToCoords,
 } from "../utils/space";
-import {
-  cleanCanvas,
-  drawImageOnCanvas,
-  drawOnCanvas,
-  getDrawnSize,
-} from "../utils/canvas";
+import { cleanCanvas, drawImageOnCanvas, drawOnCanvas } from "../utils/canvas";
 import { CanvasContext } from "../context/canvas";
 import { MouseContext } from "../context/mouse";
 
@@ -32,6 +27,7 @@ const Canvas = ({}) => {
     selectedDots,
     toggleSelected,
     checkCollisions,
+    limits,
   } = useContext(CanvasContext);
 
   const { mousePosition, updateMousePosition } = useContext(MouseContext);
@@ -41,7 +37,6 @@ const Canvas = ({}) => {
     canvasBaseSize,
   ]);
   const [isCollision, setIsCollision] = useState(-1);
-  const [drawnSize, setDrawnSize] = useState({});
   const [images, setImages] = useState([]);
 
   const handleClick = () => {
@@ -69,18 +64,23 @@ const Canvas = ({}) => {
     updateMousePosition(e, canvasref, dotSize);
   };
 
-  const updateCanvas = () => {
-    if (!ctx) return;
-    cleanCanvas(ctx);
-
-    const columns = drawnSize.maxX - drawnSize.minX + 3;
-    const rows = drawnSize.maxY - drawnSize.minY + 3;
+  const calculateHighResSize = () => {
+    const columns = limits.maxX - limits.minX + 1;
+    const rows = limits.maxY - limits.minY + 1;
     const res = printMode ? canvasBaseSize / Math.max(columns, rows) : dotSize;
 
     const highResSize = [
       (res + calculateGap(res)) * columns,
       (res + calculateGap(res)) * rows,
     ];
+    return { highResSize, res };
+  };
+
+  const updateCanvas = () => {
+    if (!ctx) return;
+    cleanCanvas(ctx);
+
+    const { highResSize, res } = calculateHighResSize();
 
     if (printMode) {
       drawImageOnCanvas(
@@ -98,7 +98,7 @@ const Canvas = ({}) => {
     if (printMode) {
       ctx.filter = "blur(3px)";
     }
-    drawDots(res, printMode ? [drawnSize.minX, drawnSize.minY] : undefined);
+    drawDots(res, printMode ? [limits.minX, limits.minY] : undefined);
     ctx.filter = "none";
     if (printMode) {
       drawImageOnCanvas(
@@ -116,8 +116,8 @@ const Canvas = ({}) => {
 
   const drawGrid = () => {
     const gap = calculateGap(dotSize);
-    for (let i = 0; i < Math.round(canvasSize[1] / dotSize); i++) {
-      for (let j = 0; j < Math.round(canvasSize[0] / dotSize); j++) {
+    for (let i = limits.minY; i <= limits.maxY; i++) {
+      for (let j = limits.minX; j <= limits.maxX; j++) {
         const x = j * (dotSize + gap);
         const y = i * (dotSize + gap);
         drawOnCanvas(ctx, [x, y], square, 0, "#DDD", dotSize);
@@ -125,15 +125,16 @@ const Canvas = ({}) => {
     }
   };
 
-  const drawDots = (dotSize, margin = undefined) => {
+  const drawDots = (res, margin = undefined) => {
+    console.log(res);
     dots.forEach((dot, i) => {
       drawOnCanvas(
         ctx,
-        positionToCoords(...dot.position, dotSize),
+        positionToCoords(...dot.position, res),
         dot.dot,
         angles[dot.rotation],
         selectedDots.includes(i) && !printMode ? "#FF0" : dot.color,
-        dotSize,
+        res,
         margin
       );
     });
@@ -162,7 +163,7 @@ const Canvas = ({}) => {
   useEffect(() => {
     if (!ctx) return;
     updateCanvas();
-  }, [ctx, canvasSize, drawnSize, dotSize, dots]);
+  }, [ctx, canvasSize, limits, dotSize, dots]);
 
   useEffect(() => {
     if (template) toggleSelected(undefined);
@@ -171,15 +172,8 @@ const Canvas = ({}) => {
 
   useEffect(() => {
     if (printMode) {
-      const newDrawnSize = getDrawnSize(dots);
-      setDrawnSize(newDrawnSize);
-      const columns = newDrawnSize.maxX - newDrawnSize.minX + 3;
-      const rows = newDrawnSize.maxY - newDrawnSize.minY + 3;
-      const res = 2048 / Math.max(columns, rows);
-      setCanvasSize([
-        (res + calculateGap(res)) * columns,
-        (res + calculateGap(res)) * rows,
-      ]);
+      const { highResSize } = calculateHighResSize();
+      setCanvasSize(highResSize);
     } else {
       resizeListener();
     }

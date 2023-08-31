@@ -16,7 +16,7 @@ export const drawOnCanvas = (
   ctx.fillStyle = color;
   ctx.beginPath();
   const base = margin
-    ? [-(margin[0] - 1) * scale * 1.04, -(margin[1] - 1) * scale * 1.04]
+    ? [-(margin[0]) * scale * 1.04, -(margin[1]) * scale * 1.04]
     : [0, 0];
   const rotationPoint = [
     startPosition[0] + path.center[0] * scale,
