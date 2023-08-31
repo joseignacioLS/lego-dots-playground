@@ -34,8 +34,12 @@ const Instructions = () => {
             <td>Rotate (counter)clockwise</td>
           </tr>
           <tr>
+            <td>[c]</td>
+            <td>Copy Selected Dots</td>
+          </tr>
+          <tr>
             <td>[v]</td>
-            <td>Paste Selected Dots</td>
+            <td>Paste Copied Dots</td>
           </tr>
           <tr>
             <td>[d]</td>

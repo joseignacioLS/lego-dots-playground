@@ -172,18 +172,34 @@ export const CanvasContextProvider = ({ children }) => {
     return -1;
   };
 
-  const pasteSelection = () => {
-    const mouse = coordsToPosition(...mousePosition, dotSize);
+  const copySelection = () => {
+
     const copiedDots = dots.filter((dot, i) => selectedDots.includes(i));
-    const limits = getDrawnSize(copiedDots);
-    copiedDots.forEach((dot) => {
-      const ele = { ...dot };
-      ele.position = [
-        dot.position[0] - limits.minX + mouse[0],
-        dot.position[1] - limits.minY + mouse[1],
-      ];
-      placeDot(ele);
-    });
+    navigator.clipboard.writeText(JSON.stringify(copiedDots))
+    setSelectedDots([])
+  }
+
+
+  const pasteSelection = async () => {
+    const mouse = coordsToPosition(...mousePosition, dotSize);
+    const copiedDots = JSON.parse(await navigator.clipboard.readText().then(data => data))
+    console.log(copiedDots)
+    try {
+
+      const limits = getDrawnSize(copiedDots);
+      copiedDots.forEach((dot) => {
+        const ele = { ...dot };
+        ele.position = [
+          dot.position[0] - limits.minX + mouse[0],
+          dot.position[1] - limits.minY + mouse[1],
+        ];
+        placeDot(ele);
+      });
+    }
+    catch (err) {
+      console.log(err)
+      alert("Wrong Paste Content Format")
+    }
   };
 
   useEffect(() => {
@@ -200,6 +216,8 @@ export const CanvasContextProvider = ({ children }) => {
       rotateDot(-1);
     } else if (e.key === "e") {
       setTemplate(undefined);
+    } else if (e.key === "c") {
+      copySelection();
     } else if (e.key === "v") {
       pasteSelection();
     } else if (e.key === "f") {
