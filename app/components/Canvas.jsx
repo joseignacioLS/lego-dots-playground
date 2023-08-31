@@ -96,7 +96,7 @@ const Canvas = ({}) => {
       drawGrid();
     }
     if (printMode) {
-      ctx.filter = "blur(2px)";
+      ctx.filter = "blur(3px)";
     }
     drawDots(res, printMode ? [drawnSize.minX, drawnSize.minY] : undefined);
     ctx.filter = "none";
@@ -108,7 +108,7 @@ const Canvas = ({}) => {
         [images[1].width, images[1].height],
         [0, 0],
         highResSize,
-        0.8,
+        1,
         "color-burn"
       );
     }
@@ -146,7 +146,7 @@ const Canvas = ({}) => {
 
   useEffect(() => {
     setImages(
-      ["/paper.jpg", "print.jpg"].map((img) => {
+      ["/paper2.png", "/print3.png"].map((img) => {
         const dom = document.createElement("img");
         dom.src = img;
         return dom;
