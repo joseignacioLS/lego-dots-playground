@@ -39,12 +39,14 @@ export const CanvasContextProvider = ({ children }) => {
 
   const placeDot = (dot) => {
     // TODO: Check multiple collisions
-    const index = checkCollisions({
+    const collisions = checkCollisions({
       position: dot.position,
       collision: dot.dot.collision[dot.rotation],
     });
-    if (index === Infinity) return;
-    if (index > -1) removeDot([index]);
+    if (collisions.length) {
+      if (collisions.includes(Infinity)) return;
+      removeDot(collisions);
+    }
     addDot(dot);
   };
 
@@ -65,11 +67,13 @@ export const CanvasContextProvider = ({ children }) => {
     setDots([]);
   };
 
-  const toggleSelected = (dot) => {
-    if (dot === undefined) return setSelectedDots([]);
-    setSelectedDots((oldValue) => {
-      if (oldValue.includes(dot)) return oldValue.filter((d) => d !== dot);
-      return [...oldValue, dot];
+  const toggleSelected = (dotArr) => {
+    if (dotArr === undefined) return setSelectedDots([]);
+    dotArr.forEach((dot) => {
+      setSelectedDots((oldValue) => {
+        if (oldValue.includes(dot)) return oldValue.filter((d) => d !== dot);
+        return [...oldValue, dot];
+      });
     });
   };
 
@@ -152,17 +156,20 @@ export const CanvasContextProvider = ({ children }) => {
     const grid = [...new Array(200)].map((_) =>
       [...new Array(200)].map((_) => 0)
     );
+    const collisions = [];
 
     const collisionMatrix = collision;
     for (let i = 0; i < collisionMatrix.length; i++) {
       for (let j = 0; j < collisionMatrix[i].length; j++) {
         if (collisionMatrix[i][j] === 0) continue;
         const y = i + position[1] - Math.floor(collisionMatrix.length / 2);
-        const x = j + position[0] - Math.floor(collisionMatrix.length / 2);
-        if (y < 0 || y >= grid.length || x < 0 || x >= grid.length)
-          return Infinity;
+        const x = j + position[0] - Math.floor(collisionMatrix[0].length / 2);
+        if (y < 0 || y >= grid.length || x < 0 || x >= grid.length) {
+          collisions.push(Infinity);
+          continue;
+        }
         grid[i + position[1] - Math.floor(collisionMatrix.length / 2)][
-          j + position[0] - Math.floor(collisionMatrix.length / 2)
+          j + position[0] - Math.floor(collisionMatrix[0].length / 2)
         ] = 1;
       }
     }
@@ -175,15 +182,15 @@ export const CanvasContextProvider = ({ children }) => {
           const y =
             i + dot.position[1] - Math.floor(collisionMatrix.length / 2);
           const x =
-            j + dot.position[0] - Math.floor(collisionMatrix.length / 2);
+            j + dot.position[0] - Math.floor(collisionMatrix[0].length / 2);
           if (y < 0 || y >= grid.length || x < 0 || x >= grid.length) continue;
           if (grid[y][x] + collisionMatrix[i][j] > 1) {
-            return n;
+            collisions.push(n);
           }
         }
       }
     }
-    return -1;
+    return collisions;
   };
 
   const copySelection = () => {
@@ -226,18 +233,24 @@ export const CanvasContextProvider = ({ children }) => {
       maxY: Math.max(size[0][1], size[1][1]),
     };
 
-    dots.forEach((dot, i) => {
+    if (limits.minX === limits.maxX && limits.minY === limits.maxY) return;
+
+    const dX = limits.maxX - limits.minX;
+    const dY = limits.maxY - limits.minY;
+    const position = [limits.minX, limits.minY];
+    const collision = [...new Array(dY * 2 + 1)].map((_, y) => {
+      return [...new Array(dX * 2 + 1)].map((_, x) =>
+        y >= dY && x >= dX ? 1 : 0
+      );
+    });
+    const collisions = checkCollisions({
+      position,
+      collision,
+    });
+
+    collisions.forEach((i) => {
       if (selectedDots.includes(i)) return;
-      const dotX = dot.position[0] - dot.dot.size[0];
-      const dotY = dot.position[1] - dot.dot.size[1];
-      if (
-        dotX >= limits.minX - 1 &&
-        dotX <= limits.maxX - 1 &&
-        dotY >= limits.minY - 1 &&
-        dotY <= limits.maxY - 1
-      ) {
-        toggleSelected(i);
-      }
+      toggleSelected([i]);
     });
     cleanDrag();
   };

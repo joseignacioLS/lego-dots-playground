@@ -43,7 +43,7 @@ const Canvas = ({}) => {
     canvasBaseSize,
     canvasBaseSize,
   ]);
-  const [isCollision, setIsCollision] = useState(-1);
+  const [isCollision, setIsCollision] = useState([]);
   const [images, setImages] = useState([]);
 
   const handleClick = () => {
@@ -51,15 +51,15 @@ const Canvas = ({}) => {
     if (mouseDrag[1]) {
       const md0 = coordsToPosition(...mouseDrag[0], dotSize);
       const md1 = coordsToPosition(...mouseDrag[1], dotSize);
-      if (md0[0] === md1[0] && md0[1] === md1[1]) return;
+      if (md0[0] !== md1[0] || md0[1] !== md1[1]) return;
     }
-    if (isCollision === -1 && !template) {
+    if (!template) {
       const position = coordsToPosition(...mousePosition, dotSize);
-      const index = checkCollisions({
+      const collisions = checkCollisions({
         position,
         collision: [[1]],
       });
-      toggleSelected(index);
+      toggleSelected(collisions);
     }
     if (template) {
       const position = coordsToPosition(...mousePosition, dotSize);
@@ -179,7 +179,7 @@ const Canvas = ({}) => {
 
   useEffect(() => {
     if (template) toggleSelected(undefined);
-    if (!template) setIsCollision(-1);
+    if (!template) setIsCollision([]);
   }, [template]);
 
   useEffect(() => {
@@ -199,19 +199,18 @@ const Canvas = ({}) => {
     if (printMode) return;
 
     if (!template) return;
-    const index = checkCollisions({
+    const collisions = checkCollisions({
       position: coordsToPosition(...mousePosition, dotSize),
       collision: template.collision[rotation],
     });
-
-    setIsCollision(index);
+    setIsCollision(collisions);
 
     drawOnCanvas(
       ctx,
       mousePosition,
       template,
       angles[rotation],
-      isCollision > -1 ? "#F00" : color,
+      isCollision.length > 0 ? "#F00" : color,
       dotSize
     );
   }, [mousePosition, template, color, rotation, selectedDots, canvasSize]);
