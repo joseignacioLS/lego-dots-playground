@@ -219,6 +219,7 @@ const Canvas = ({}) => {
   useEffect(() => {
     if (printMode) {
       const { highResSize } = calculateHighResSize();
+      cleanCanvas(ctx);
       setCanvasSize(highResSize);
     } else {
       resizeListener();

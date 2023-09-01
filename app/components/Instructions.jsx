@@ -4,6 +4,12 @@ import styles from "./Instructions.module.scss";
 const Instructions = () => {
   return (
     <div>
+      <h2 className={styles.title}>Tips</h2>
+      <ul>
+        <li>
+          <p>Click and drag to select multiple dots!</p>
+        </li>
+      </ul>
       <h2 className={styles.title}>Keyboard Shortcuts</h2>
       <table className={styles.table}>
         <thead>
@@ -23,7 +29,7 @@ const Instructions = () => {
           </tr>
           <tr>
             <td>[f]</td>
-            <td>Un select</td>
+            <td>Unselect</td>
           </tr>
           <tr>
             <td>[q]</td>

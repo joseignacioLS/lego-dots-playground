@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import styles from "./Controllers.module.scss";
 import { ModalContext } from "../context/modal";
 import { colors } from "../data/data";
@@ -10,8 +10,10 @@ import {
   rectangle,
   square,
 } from "../data/dots";
-import Miniature from "./Miniature";
 import { CanvasContext } from "../context/canvas";
+import Dial from "./ControllerModules/Dial";
+import TemplatesBar from "./ControllerModules/TemplatesBar";
+import ColorBar from "./ControllerModules/ColorBar";
 
 const templates = [square, curveCorner, digglet, circle, rectangle, curve3x3];
 
@@ -23,16 +25,27 @@ const Controllers = ({}) => {
     handleDotSizeChange,
     printMode,
     dotSize,
-    template,
-    setTemplate,
-    color,
-    updateColor,
     exportGrid,
     loadGrid,
     setPrintMode,
     limits,
     updateLimits,
   } = useContext(CanvasContext);
+
+  const openImportModal = () => {
+    openModal(
+      <div>
+        <input
+          id="file"
+          type="file"
+          onChange={(e) => {
+            loadGrid();
+            hideModal();
+          }}
+        ></input>
+      </div>
+    );
+  };
 
   return (
     <section className={styles.controls}>
@@ -49,151 +62,50 @@ const Controllers = ({}) => {
           <div className={styles.managing}>
             <label className={styles.labelAndButtons}>
               Dot Size
-              <div>
-                <button onClick={(e) => handleDotSizeChange(dotSize - 4)}>
-                  -
-                </button>
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: "2rem",
-                    margin: "0 .5rem",
-                    textAlign: "center",
-                  }}
-                >
-                  {dotSize}
-                </span>
-
-                <button onClick={(e) => handleDotSizeChange(dotSize + 4)}>
-                  +
-                </button>
-              </div>
+              <Dial
+                value={dotSize}
+                leftBtnAction={() => handleDotSizeChange(dotSize - 4)}
+                rightBtnAction={() => handleDotSizeChange(dotSize + 4)}
+              ></Dial>
             </label>
             <div className={styles.oneLine}>
               <label className={styles.labelAndButtons}>
                 Left Limit
-                <div>
-                  <button onClick={(e) => updateLimits("minX", -1)}>-</button>
-                  <span
-                    style={{
-                      display: "inline-block",
-                      width: "2rem",
-                      margin: "0 .5rem",
-                      textAlign: "center",
-                    }}
-                  >
-                    {limits.minX}
-                  </span>
-
-                  <button onClick={(e) => updateLimits("minX", 1)}>+</button>
-                </div>
+                <Dial
+                  value={limits.minX}
+                  leftBtnAction={() => updateLimits("minX", -1)}
+                  rightBtnAction={() => updateLimits("minX", 1)}
+                ></Dial>
               </label>
               <label className={styles.labelAndButtons}>
                 Right Limit
-                <div>
-                  <button onClick={(e) => updateLimits("maxX", -1)}>-</button>
-                  <span
-                    style={{
-                      display: "inline-block",
-                      width: "2rem",
-                      margin: "0 .5rem",
-                      textAlign: "center",
-                    }}
-                  >
-                    {limits.maxX}
-                  </span>
-
-                  <button onClick={(e) => updateLimits("maxX", 1)}>+</button>
-                </div>
+                <Dial
+                  value={limits.maxX}
+                  leftBtnAction={() => updateLimits("maxX", -1)}
+                  rightBtnAction={() => updateLimits("maxX", 1)}
+                ></Dial>
               </label>
             </div>
             <div className={styles.oneLine}>
               <label className={styles.labelAndButtons}>
                 Top Limit
-                <div>
-                  <button onClick={(e) => updateLimits("minY", -1)}>-</button>
-                  <span
-                    style={{
-                      display: "inline-block",
-                      width: "2rem",
-                      margin: "0 .5rem",
-                      textAlign: "center",
-                    }}
-                  >
-                    {limits.minY}
-                  </span>
-
-                  <button onClick={(e) => updateLimits("minY", 1)}>+</button>
-                </div>
+                <Dial
+                  value={limits.minY}
+                  leftBtnAction={() => updateLimits("minY", -1)}
+                  rightBtnAction={() => updateLimits("minY", 1)}
+                ></Dial>
               </label>
               <label className={styles.labelAndButtons}>
                 Bottom Limit
-                <div>
-                  <button onClick={(e) => updateLimits("maxY", -1)}>-</button>
-                  <span
-                    style={{
-                      display: "inline-block",
-                      width: "2rem",
-                      margin: "0 .5rem",
-                      textAlign: "center",
-                    }}
-                  >
-                    {limits.maxY}
-                  </span>
-
-                  <button onClick={(e) => updateLimits("maxY", 1)}>+</button>
-                </div>
+                <Dial
+                  value={limits.maxY}
+                  leftBtnAction={() => updateLimits("maxY", -1)}
+                  rightBtnAction={() => updateLimits("maxY", 1)}
+                ></Dial>
               </label>
             </div>
-            <div className={styles.templateTiles}>
-              <div
-                className={`${styles.cell} ${
-                  template === undefined && styles.cellSelected
-                }`}
-                onClick={() => setTemplate(undefined)}
-              >
-                👆
-              </div>
-              {templates.map((ttemplate, i) => {
-                if (!ttemplate?.size) return <>X</>;
-                return (
-                  <div
-                    key={i}
-                    className={`${styles.cell} ${
-                      ttemplate === template && styles.cellSelected
-                    }`}
-                    style={{ border: "1px solid black" }}
-                    onClick={() => setTemplate(ttemplate)}
-                  >
-                    <Miniature
-                      template={ttemplate}
-                      color={color}
-                      size={32}
-                      w={ttemplate?.size?.[0]}
-                      h={ttemplate?.size?.[1]}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-            <div className={styles.templateColors}>
-              {colors.map((ccolor) => {
-                return (
-                  <div
-                    key={ccolor}
-                    onClick={(e) => {
-                      updateColor(ccolor);
-                    }}
-                    style={{
-                      width: "2rem",
-                      height: "2rem",
-                      backgroundColor: ccolor,
-                      border: ccolor === color && "2px solid red",
-                    }}
-                  ></div>
-                );
-              })}
-            </div>
+            <TemplatesBar templates={templates} />
+            <ColorBar colors={colors}></ColorBar>
             <div className={styles.actions}>
               <button onClick={removeSelectedDots}>Delete</button>
               <button onClick={() => rotateDot(1)}>Rotate</button>
@@ -202,24 +114,7 @@ const Controllers = ({}) => {
           </div>
           <div className={styles.loadOptions}>
             <button onClick={exportGrid}>Export</button>
-            <button
-              onClick={() =>
-                openModal(
-                  <div>
-                    <input
-                      id="file"
-                      type="file"
-                      onChange={(e) => {
-                        loadGrid();
-                        hideModal();
-                      }}
-                    ></input>
-                  </div>
-                )
-              }
-            >
-              Import
-            </button>
+            <button onClick={openImportModal}>Import</button>
           </div>
         </>
       )}

@@ -1,0 +1,27 @@
+.templateBar,
+.templateBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  padding-bottom: 1rem;
+  border-bottom: 1px solid black;
+
+  > * {
+    flex-shrink: 0;
+  }
+}
+
+.cell {
+  flex-shrink: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  cursor: pointer;
+
+  &Selected {
+    outline: 2px solid red;
+  }
+}
