@@ -4,6 +4,13 @@ export const cleanCanvas = (ctx) => {
   ctx.clearRect(0, 0, 5000, 5000);
 };
 
+export const drawRect = (ctx, origin, size) => {
+  ctx.strokeStyle = "red";
+  ctx.beginPath();
+  ctx.rect(...origin, ...size);
+  ctx.stroke();
+};
+
 export const drawOnCanvas = (
   ctx,
   startPosition,

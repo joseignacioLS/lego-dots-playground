@@ -9,6 +9,7 @@ export const MouseContextProvider = ({ children }) => {
   const [mousePosition, setMousePosition] = useState(undefined);
   const [mouseMovTime, setMouseMovTime] = useState(new Date());
   const [mouseDrag, setMouseDrag] = useState([undefined, undefined]);
+  const [isDragging, setIsDragging] = useState(false);
 
   const updateMousePosition = (e, ref, dotSize) => {
     const timeDiff = new Date().getTime() - mouseMovTime.getTime();
@@ -29,10 +30,12 @@ export const MouseContextProvider = ({ children }) => {
 
   const cleanDrag = () => {
     setMouseDrag([undefined, undefined]);
+    setIsDragging(false);
   };
 
   useEffect(() => {
     if (mouseDrag[0] === undefined) return;
+    setIsDragging(true);
     setMouseDrag((old) => {
       return [[...old[0]], [...mousePosition]];
     });
@@ -46,6 +49,7 @@ export const MouseContextProvider = ({ children }) => {
         mouseDrag,
         setDragOrigin,
         cleanDrag,
+        isDragging,
       }}
     >
       {children}

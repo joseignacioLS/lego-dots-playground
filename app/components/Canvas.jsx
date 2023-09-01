@@ -6,7 +6,12 @@ import {
   coordsToPosition,
   positionToCoords,
 } from "../utils/space";
-import { cleanCanvas, drawImageOnCanvas, drawOnCanvas } from "../utils/canvas";
+import {
+  cleanCanvas,
+  drawImageOnCanvas,
+  drawOnCanvas,
+  drawRect,
+} from "../utils/canvas";
 import { CanvasContext } from "../context/canvas";
 import { MouseContext } from "../context/mouse";
 
@@ -37,6 +42,7 @@ const Canvas = ({}) => {
     mouseDrag,
     setDragOrigin,
     cleanDrag,
+    isDragging,
   } = useContext(MouseContext);
 
   const [canvasSize, setCanvasSize] = useState([
@@ -46,14 +52,8 @@ const Canvas = ({}) => {
   const [isCollision, setIsCollision] = useState([]);
   const [images, setImages] = useState([]);
 
-  const handleClick = () => {
-    if (!mousePosition) return;
-    if (mouseDrag[1]) {
-      const md0 = coordsToPosition(...mouseDrag[0], dotSize);
-      const md1 = coordsToPosition(...mouseDrag[1], dotSize);
-      if (md0[0] !== md1[0] || md0[1] !== md1[1]) return;
-    }
-    if (!template) {
+  const clickSelect = () => {
+    if (!template && !isDragging) {
       const position = coordsToPosition(...mousePosition, dotSize);
       const collisions = checkCollisions({
         position,
@@ -61,7 +61,21 @@ const Canvas = ({}) => {
       });
       toggleSelected(collisions);
     }
-    if (template) {
+  };
+
+  const handleClickDown = () => {
+    if (!mousePosition) return;
+    setDragOrigin();
+  };
+
+  const handleClickUp = () => {
+    if (!template) {
+      if (!isDragging) {
+        clickSelect();
+      } else {
+        dragSelect();
+      }
+    } else {
       const position = coordsToPosition(...mousePosition, dotSize);
       placeDot({
         dot: template,
@@ -70,9 +84,10 @@ const Canvas = ({}) => {
         rotation,
       });
     }
+    cleanDrag();
   };
 
-  const handleOver = (e) => {
+  const handleMouseOver = (e) => {
     updateMousePosition(e, canvasref, dotSize);
   };
 
@@ -111,6 +126,25 @@ const Canvas = ({}) => {
       ctx.filter = `blur(3px)`;
     }
     drawDots(res);
+
+    if (!template && isDragging) {
+      const limits = {
+        minX: Math.min(mouseDrag[0][0], mouseDrag[1][0]),
+        maxX: Math.max(mouseDrag[0][0], mouseDrag[1][0]),
+        minY: Math.min(mouseDrag[0][1], mouseDrag[1][1]),
+        maxY: Math.max(mouseDrag[0][1], mouseDrag[1][1]),
+      };
+
+      const origin = positionToCoords(
+        ...coordsToPosition(limits.minX, limits.minY, dotSize),
+        dotSize
+      );
+      const size = [
+        limits.maxX - limits.minX + dotSize,
+        limits.maxY - limits.minY + dotSize,
+      ];
+      drawRect(ctx, origin, size);
+    }
     ctx.filter = "none";
     if (printMode) {
       drawImageOnCanvas(
@@ -120,7 +154,7 @@ const Canvas = ({}) => {
         [images[1].width, images[1].height],
         [0, 0],
         highResSize,
-        1,
+        0.5,
         "color-burn"
       );
     }
@@ -221,10 +255,9 @@ const Canvas = ({}) => {
       height={canvasSize[1]}
       ref={canvasref}
       className={styles.canvas}
-      onClick={handleClick}
-      onMouseMove={handleOver}
-      onMouseDown={setDragOrigin}
-      onMouseUp={dragSelect}
+      onMouseMove={handleMouseOver}
+      onMouseDown={handleClickDown}
+      onMouseUp={handleClickUp}
       onMouseLeave={cleanDrag}
     ></canvas>
   );

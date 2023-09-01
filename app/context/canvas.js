@@ -11,16 +11,16 @@ export const CanvasContext = createContext(null);
 export const CanvasContextProvider = ({ children }) => {
   const [dots, setDots] = useState([]);
   const [selectedDots, setSelectedDots] = useState([]);
-  const [dotSize, setDotSize] = useState(64);
+  const [dotSize, setDotSize] = useState(48);
   const [color, setColor] = useState(colors[0]);
   const [rotation, setRotation] = useState(0);
   const [template, setTemplate] = useState(undefined);
   const [printMode, setPrintMode] = useState(false);
   const [limits, setLimits] = useState({
     minX: 0,
-    maxX: 10,
+    maxX: 8,
     minY: 0,
-    maxY: 10,
+    maxY: 8,
   });
 
   const updateLimits = (key, delta) => {
@@ -38,7 +38,6 @@ export const CanvasContextProvider = ({ children }) => {
   };
 
   const placeDot = (dot) => {
-    // TODO: Check multiple collisions
     const collisions = checkCollisions({
       position: dot.position,
       collision: dot.dot.collision[dot.rotation],
@@ -152,6 +151,12 @@ export const CanvasContextProvider = ({ children }) => {
     });
   };
 
+  /**
+   *
+   * @param {*} {position: 2d int array with the center of the collision matrix,
+   * collision: mxn collision matrix where 1s collide and 0s dont}
+   * @returns array with indexes of colliding dots
+   */
   const checkCollisions = ({ position, collision }) => {
     const grid = [...new Array(200)].map((_) =>
       [...new Array(200)].map((_) => 0)
@@ -185,6 +190,7 @@ export const CanvasContextProvider = ({ children }) => {
             j + dot.position[0] - Math.floor(collisionMatrix[0].length / 2);
           if (y < 0 || y >= grid.length || x < 0 || x >= grid.length) continue;
           if (grid[y][x] + collisionMatrix[i][j] > 1) {
+            if (collisions.includes(n)) continue;
             collisions.push(n);
           }
         }
@@ -221,7 +227,7 @@ export const CanvasContextProvider = ({ children }) => {
   };
 
   const dragSelect = () => {
-    if (!mouseDrag[0] || !mouseDrag[1]) return;
+    if (!mouseDrag[0] || !mouseDrag[1]) return cleanDrag();
     const size = mouseDrag.map((p) => {
       return coordsToPosition(...p, dotSize);
     });
@@ -233,8 +239,6 @@ export const CanvasContextProvider = ({ children }) => {
       maxY: Math.max(size[0][1], size[1][1]),
     };
 
-    if (limits.minX === limits.maxX && limits.minY === limits.maxY) return;
-
     const dX = limits.maxX - limits.minX;
     const dY = limits.maxY - limits.minY;
     const position = [limits.minX, limits.minY];
@@ -243,6 +247,7 @@ export const CanvasContextProvider = ({ children }) => {
         y >= dY && x >= dX ? 1 : 0
       );
     });
+
     const collisions = checkCollisions({
       position,
       collision,
