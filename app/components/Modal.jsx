@@ -10,7 +10,7 @@ const Modal = () => {
     <div className={styles.modalBG}>
       <div className={styles.modalWrapper}>
         <button className={styles.closeButton} onClick={hideModal}>
-          X
+          ✖
         </button>
         {content}
       </div>
