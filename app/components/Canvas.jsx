@@ -28,9 +28,16 @@ const Canvas = ({}) => {
     toggleSelected,
     checkCollisions,
     limits,
+    dragSelect,
   } = useContext(CanvasContext);
 
-  const { mousePosition, updateMousePosition } = useContext(MouseContext);
+  const {
+    mousePosition,
+    updateMousePosition,
+    mouseDrag,
+    setDragOrigin,
+    cleanDrag,
+  } = useContext(MouseContext);
 
   const [canvasSize, setCanvasSize] = useState([
     canvasBaseSize,
@@ -41,6 +48,11 @@ const Canvas = ({}) => {
 
   const handleClick = () => {
     if (!mousePosition) return;
+    if (mouseDrag[1]) {
+      const md0 = coordsToPosition(...mouseDrag[0], dotSize);
+      const md1 = coordsToPosition(...mouseDrag[1], dotSize);
+      if (md0[0] === md1[0] && md0[1] === md1[1]) return;
+    }
     if (isCollision === -1 && !template) {
       const position = coordsToPosition(...mousePosition, dotSize);
       const index = checkCollisions({
@@ -73,14 +85,14 @@ const Canvas = ({}) => {
       (res + calculateGap(res)) * columns,
       (res + calculateGap(res)) * rows,
     ];
-    return { highResSize, res };
+    return { highResSize, res, columns, rows };
   };
 
   const updateCanvas = () => {
     if (!ctx) return;
     cleanCanvas(ctx);
 
-    const { highResSize, res } = calculateHighResSize();
+    const { highResSize, res, columns, rows } = calculateHighResSize();
 
     if (printMode) {
       drawImageOnCanvas(
@@ -95,10 +107,10 @@ const Canvas = ({}) => {
     if (!printMode) {
       drawGrid();
     }
-    if (printMode) {
-      ctx.filter = "blur(3px)";
+    if (printMode && rows < 10 && columns < 10) {
+      ctx.filter = `blur(3px)`;
     }
-    drawDots(res, printMode ? [limits.minX, limits.minY] : undefined);
+    drawDots(res);
     ctx.filter = "none";
     if (printMode) {
       drawImageOnCanvas(
@@ -125,17 +137,17 @@ const Canvas = ({}) => {
     }
   };
 
-  const drawDots = (res, margin = undefined) => {
-    console.log(res);
+  const drawDots = (res) => {
     dots.forEach((dot, i) => {
+      if (printMode && dot.position[0] - dot.dot.size[0] > limits.maxX) return;
+      if (printMode && dot.position[1] - dot.dot.size[1] > limits.maxY) return;
       drawOnCanvas(
         ctx,
         positionToCoords(...dot.position, res),
         dot.dot,
         angles[dot.rotation],
         selectedDots.includes(i) && !printMode ? "#FF0" : dot.color,
-        res,
-        margin
+        res
       );
     });
   };
@@ -212,6 +224,9 @@ const Canvas = ({}) => {
       className={styles.canvas}
       onClick={handleClick}
       onMouseMove={handleOver}
+      onMouseDown={setDragOrigin}
+      onMouseUp={dragSelect}
+      onMouseLeave={cleanDrag}
     ></canvas>
   );
 };

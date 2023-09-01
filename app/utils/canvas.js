@@ -10,14 +10,10 @@ export const drawOnCanvas = (
   path,
   rotation = 0,
   color = "#000",
-  scale = 50,
-  margin = undefined
+  scale = 50
 ) => {
   ctx.fillStyle = color;
-  ctx.beginPath();
-  const base = margin
-    ? [-(margin[0]) * scale * 1.04, -(margin[1]) * scale * 1.04]
-    : [0, 0];
+  const base = [0, 0];
   const rotationPoint = [
     startPosition[0] + path.center[0] * scale,
     startPosition[1] + path.center[1] * scale,
@@ -29,6 +25,7 @@ export const drawOnCanvas = (
     ...rotationPoint,
     rotation
   );
+  ctx.beginPath();
   ctx.moveTo(base[0] + rotatedStart[0], base[1] + rotatedStart[1]);
   path.paths.forEach((path) => {
     if (path.type === "line") {
@@ -37,7 +34,7 @@ export const drawOnCanvas = (
         startPosition[1] + path.coords[1] * scale,
       ];
       const [rX, rY] = rotatePoint(x, y, ...rotationPoint, rotation);
-      ctx.lineTo(base[0] + rX, base[1] + rY);
+      ctx.lineTo(Math.round(base[0] + rX), Math.round(base[1] + rY));
     }
     if (path.type === "arc") {
       const [x0, y0] = [
@@ -60,8 +57,8 @@ export const drawOnCanvas = (
         base[1] + rY0,
         base[0] + rX1,
         base[1] + rY1,
-        base[0] + rX2,
-        base[1] + rY2
+        Math.round(base[0] + rX2),
+        Math.round(base[1] + rY2)
       );
     }
     if (path.type === "circle") {
@@ -71,7 +68,13 @@ export const drawOnCanvas = (
       ];
       const [rX0, rY0] = rotatePoint(x0, y0, ...rotationPoint, rotation);
       const r = path.coords[2] * scale;
-      ctx.arc(base[0] + rX0, base[1] + rY0, r, path.coords[3], path.coords[4]);
+      ctx.arc(
+        Math.round(base[0] + rX0),
+        Math.round(base[1] + rY0),
+        r,
+        path.coords[3],
+        path.coords[4]
+      );
     }
   });
   ctx.fill();

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { coordsToPosition, positionToCoords } from "../utils/space";
 
 export const MouseContext = createContext(null);
@@ -8,6 +8,7 @@ export const MouseContext = createContext(null);
 export const MouseContextProvider = ({ children }) => {
   const [mousePosition, setMousePosition] = useState(undefined);
   const [mouseMovTime, setMouseMovTime] = useState(new Date());
+  const [mouseDrag, setMouseDrag] = useState([undefined, undefined]);
 
   const updateMousePosition = (e, ref, dotSize) => {
     const timeDiff = new Date().getTime() - mouseMovTime.getTime();
@@ -21,8 +22,32 @@ export const MouseContextProvider = ({ children }) => {
     setMousePosition(coords);
   };
 
+  const setDragOrigin = () => {
+    cleanDrag();
+    setMouseDrag([[...mousePosition], undefined]);
+  };
+
+  const cleanDrag = () => {
+    setMouseDrag([undefined, undefined]);
+  };
+
+  useEffect(() => {
+    if (mouseDrag[0] === undefined) return;
+    setMouseDrag((old) => {
+      return [[...old[0]], [...mousePosition]];
+    });
+  }, [mousePosition]);
+
   return (
-    <MouseContext.Provider value={{ mousePosition, updateMousePosition }}>
+    <MouseContext.Provider
+      value={{
+        mousePosition,
+        updateMousePosition,
+        mouseDrag,
+        setDragOrigin,
+        cleanDrag,
+      }}
+    >
       {children}
     </MouseContext.Provider>
   );

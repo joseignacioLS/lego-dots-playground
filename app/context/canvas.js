@@ -20,18 +20,18 @@ export const CanvasContextProvider = ({ children }) => {
     minX: 0,
     maxX: 10,
     minY: 0,
-    maxY: 10
-  })
+    maxY: 10,
+  });
 
   const updateLimits = (key, delta) => {
-    if (!(key in limits)) return
+    if (!(key in limits)) return;
 
-    setLimits(oldValue => {
-      return { ...oldValue, [key]: oldValue[key] + delta }
-    })
-  }
+    setLimits((oldValue) => {
+      return { ...oldValue, [key]: oldValue[key] + delta };
+    });
+  };
 
-  const { mousePosition } = useContext(MouseContext);
+  const { mousePosition, mouseDrag, cleanDrag } = useContext(MouseContext);
 
   const addDot = (dot) => {
     setDots((oldValue) => [...oldValue, dot]);
@@ -187,19 +187,17 @@ export const CanvasContextProvider = ({ children }) => {
   };
 
   const copySelection = () => {
-
     const copiedDots = dots.filter((dot, i) => selectedDots.includes(i));
-    navigator.clipboard.writeText(JSON.stringify(copiedDots))
-    setSelectedDots([])
-  }
-
+    navigator.clipboard.writeText(JSON.stringify(copiedDots));
+    setSelectedDots([]);
+  };
 
   const pasteSelection = async () => {
     const mouse = coordsToPosition(...mousePosition, dotSize);
-    const copiedDots = JSON.parse(await navigator.clipboard.readText().then(data => data))
-    console.log(copiedDots)
+    const copiedDots = JSON.parse(
+      await navigator.clipboard.readText().then((data) => data)
+    );
     try {
-
       const limits = getDrawnSize(copiedDots);
       copiedDots.forEach((dot) => {
         const ele = { ...dot };
@@ -209,11 +207,39 @@ export const CanvasContextProvider = ({ children }) => {
         ];
         placeDot(ele);
       });
+    } catch (err) {
+      console.log(err);
+      alert("Wrong Paste Content Format");
     }
-    catch (err) {
-      console.log(err)
-      alert("Wrong Paste Content Format")
-    }
+  };
+
+  const dragSelect = () => {
+    if (!mouseDrag[0] || !mouseDrag[1]) return;
+    const size = mouseDrag.map((p) => {
+      return coordsToPosition(...p, dotSize);
+    });
+
+    const limits = {
+      minX: Math.min(size[0][0], size[1][0]),
+      maxX: Math.max(size[0][0], size[1][0]),
+      minY: Math.min(size[0][1], size[1][1]),
+      maxY: Math.max(size[0][1], size[1][1]),
+    };
+
+    dots.forEach((dot, i) => {
+      if (selectedDots.includes(i)) return;
+      const dotX = dot.position[0] - dot.dot.size[0];
+      const dotY = dot.position[1] - dot.dot.size[1];
+      if (
+        dotX >= limits.minX - 1 &&
+        dotX <= limits.maxX - 1 &&
+        dotY >= limits.minY - 1 &&
+        dotY <= limits.maxY - 1
+      ) {
+        toggleSelected(i);
+      }
+    });
+    cleanDrag();
   };
 
   useEffect(() => {
@@ -287,7 +313,8 @@ export const CanvasContextProvider = ({ children }) => {
         exportGrid,
         checkCollisions,
         limits,
-        updateLimits
+        updateLimits,
+        dragSelect,
       }}
     >
       {children}

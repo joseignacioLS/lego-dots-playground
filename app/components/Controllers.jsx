@@ -209,16 +209,11 @@ const Controllers = ({}) => {
                     <input
                       id="file"
                       type="file"
-                      onLoad={(e) => console.log(e)}
-                    ></input>
-                    <button
-                      onClick={() => {
+                      onChange={(e) => {
                         loadGrid();
                         hideModal();
                       }}
-                    >
-                      Load
-                    </button>
+                    ></input>
                   </div>
                 )
               }
