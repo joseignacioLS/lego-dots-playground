@@ -57,7 +57,7 @@ const Canvas = ({}) => {
       const position = coordsToPosition(...mousePosition, dotSize);
       const collisions = checkCollisions({
         position,
-        collision: [[1]],
+        collision: [[[1,1,1,1]]],
       });
       toggleSelected(collisions);
     }

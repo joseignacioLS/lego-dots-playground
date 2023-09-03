@@ -11,7 +11,7 @@ export const CanvasContext = createContext(null);
 export const CanvasContextProvider = ({ children }) => {
   const [dots, setDots] = useState([]);
   const [selectedDots, setSelectedDots] = useState([]);
-  const [dotSize, setDotSize] = useState(48);
+  const [dotSize, setDotSize] = useState(36);
   const [color, setColor] = useState(colors[0]);
   const [rotation, setRotation] = useState(0);
   const [template, setTemplate] = useState(undefined);
@@ -159,39 +159,43 @@ export const CanvasContextProvider = ({ children }) => {
    */
   const checkCollisions = ({ position, collision }) => {
     const grid = [...new Array(200)].map((_) =>
-      [...new Array(200)].map((_) => 0)
+      [...new Array(200)].map((_) => [])
     );
     const collisions = [];
 
     const collisionMatrix = collision;
     for (let i = 0; i < collisionMatrix.length; i++) {
       for (let j = 0; j < collisionMatrix[i].length; j++) {
-        if (collisionMatrix[i][j] === 0) continue;
+        if (collisionMatrix[i][j].length === 0) continue;
         const y = i + position[1] - Math.floor(collisionMatrix.length / 2);
         const x = j + position[0] - Math.floor(collisionMatrix[0].length / 2);
-        if (y < 0 || y >= grid.length || x < 0 || x >= grid.length) {
+        if (y < 0 || y >= grid.length || x < 0 || x >= grid[0].length) {
           collisions.push(Infinity);
           continue;
         }
         grid[i + position[1] - Math.floor(collisionMatrix.length / 2)][
           j + position[0] - Math.floor(collisionMatrix[0].length / 2)
-        ] = 1;
+        ] = collisionMatrix[i][j];
       }
     }
+
     for (let n = 0; n < dots.length; n++) {
       const dot = dots[n];
       const collisionMatrix = dot.dot.collision[dot.rotation];
+      
       for (let i = 0; i < collisionMatrix.length; i++) {
         for (let j = 0; j < collisionMatrix[i].length; j++) {
-          if (collisionMatrix[i][j] === 0) continue;
+          if (collisionMatrix[i][j].length === 0) continue;
           const y =
             i + dot.position[1] - Math.floor(collisionMatrix.length / 2);
           const x =
             j + dot.position[0] - Math.floor(collisionMatrix[0].length / 2);
           if (y < 0 || y >= grid.length || x < 0 || x >= grid.length) continue;
-          if (grid[y][x] + collisionMatrix[i][j] > 1) {
-            if (collisions.includes(n)) continue;
-            collisions.push(n);
+          if (grid[y][x].reduce((acc, curr, k) => {
+            return curr + collisionMatrix[i][j][k] > 1 || acc
+          }, false)) {
+              if (collisions.includes(n)) continue;
+              collisions.push(n);
           }
         }
       }
@@ -244,7 +248,7 @@ export const CanvasContextProvider = ({ children }) => {
     const position = [limits.minX, limits.minY];
     const collision = [...new Array(dY * 2 + 1)].map((_, y) => {
       return [...new Array(dX * 2 + 1)].map((_, x) =>
-        y >= dY && x >= dX ? 1 : 0
+        y >= dY && x >= dX ? [1,1,1,1] : []
       );
     });
 
