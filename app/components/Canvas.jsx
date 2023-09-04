@@ -58,7 +58,7 @@ const Canvas = ({}) => {
       const position = coordsToPosition(...mousePosition, dotSize);
       const collisions = checkCollisions({
         position,
-        collision: [[[1, 1, 1, 1]]],
+        collisionMatrix: [[[1, 1, 1, 1]]],
       });
       toggleSelected(collisions);
     }
@@ -244,7 +244,7 @@ const Canvas = ({}) => {
     if (!template) return;
     const collisions = checkCollisions({
       position: coordsToPosition(...mousePosition, dotSize),
-      collision: template.collision[rotation],
+      collisionMatrix: template.collision[rotation],
     });
     setIsCollision(collisions);
 
