@@ -29,6 +29,7 @@ const Canvas = ({}) => {
     color,
     rotation,
     printMode,
+    background,
     selectedDots,
     toggleSelected,
     checkCollisions,
@@ -57,7 +58,7 @@ const Canvas = ({}) => {
       const position = coordsToPosition(...mousePosition, dotSize);
       const collisions = checkCollisions({
         position,
-        collision: [[[1,1,1,1]]],
+        collision: [[[1, 1, 1, 1]]],
       });
       toggleSelected(collisions);
     }
@@ -110,14 +111,21 @@ const Canvas = ({}) => {
     const { highResSize, res, columns, rows } = calculateHighResSize();
 
     if (printMode) {
-      drawImageOnCanvas(
-        ctx,
-        images[0],
-        [0, 0],
-        [images[0].width, images[0].height],
-        [0, 0],
-        highResSize
-      );
+      if (background) {
+        drawImageOnCanvas(
+          ctx,
+          images[0],
+          [0, 0],
+          [images[0].width, images[0].height],
+          [0, 0],
+          highResSize
+        );
+      } else {
+        ctx.beginPath();
+        ctx.rect(0, 0, 10000, 10000);
+        ctx.fillStyle = "#FFF";
+        ctx.fill();
+      }
     }
     if (!printMode) {
       drawGrid();
@@ -224,7 +232,7 @@ const Canvas = ({}) => {
     } else {
       resizeListener();
     }
-  }, [printMode]);
+  }, [printMode, background]);
 
   useEffect(() => {
     if (!ctx || !mousePosition) return;

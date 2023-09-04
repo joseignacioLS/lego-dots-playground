@@ -24,6 +24,8 @@ const Controllers = ({}) => {
     removeSelectedDots,
     handleDotSizeChange,
     printMode,
+    background,
+    setBackground,
     dotSize,
     exportGrid,
     loadGrid,
@@ -57,6 +59,14 @@ const Controllers = ({}) => {
         ></input>
         Print Mode
       </label>
+      {printMode && <label>
+        <input
+          type="checkbox"
+          checked={background}
+          onChange={(e) => setBackground(e.currentTarget.checked)}
+        ></input>
+        Background
+      </label>}
       {!printMode && (
         <>
           <div className={styles.managing}>

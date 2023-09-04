@@ -16,6 +16,7 @@ export const CanvasContextProvider = ({ children }) => {
   const [rotation, setRotation] = useState(0);
   const [template, setTemplate] = useState(undefined);
   const [printMode, setPrintMode] = useState(false);
+  const [background, setBackground] = useState(true);
   const [limits, setLimits] = useState({
     minX: 0,
     maxX: 8,
@@ -182,7 +183,7 @@ export const CanvasContextProvider = ({ children }) => {
     for (let n = 0; n < dots.length; n++) {
       const dot = dots[n];
       const collisionMatrix = dot.dot.collision[dot.rotation];
-      
+
       for (let i = 0; i < collisionMatrix.length; i++) {
         for (let j = 0; j < collisionMatrix[i].length; j++) {
           if (collisionMatrix[i][j].length === 0) continue;
@@ -194,8 +195,8 @@ export const CanvasContextProvider = ({ children }) => {
           if (grid[y][x].reduce((acc, curr, k) => {
             return curr + collisionMatrix[i][j][k] > 1 || acc
           }, false)) {
-              if (collisions.includes(n)) continue;
-              collisions.push(n);
+            if (collisions.includes(n)) continue;
+            collisions.push(n);
           }
         }
       }
@@ -248,7 +249,7 @@ export const CanvasContextProvider = ({ children }) => {
     const position = [limits.minX, limits.minY];
     const collision = [...new Array(dY * 2 + 1)].map((_, y) => {
       return [...new Array(dX * 2 + 1)].map((_, x) =>
-        y >= dY && x >= dX ? [1,1,1,1] : []
+        y >= dY && x >= dX ? [1, 1, 1, 1] : []
       );
     });
 
@@ -337,6 +338,8 @@ export const CanvasContextProvider = ({ children }) => {
         limits,
         updateLimits,
         dragSelect,
+        background,
+        setBackground
       }}
     >
       {children}
