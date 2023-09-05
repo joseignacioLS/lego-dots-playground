@@ -11,6 +11,58 @@ export const drawRect = (ctx, origin, size) => {
   ctx.stroke();
 };
 
+const drawLine = (ctx, base, startPosition, path, scale, rotationPoint, rotation) => {
+  const [x, y] = [
+    startPosition[0] + path.coords[0] * scale,
+    startPosition[1] + path.coords[1] * scale,
+  ];
+  const [rX, rY] = rotatePoint(x, y, ...rotationPoint, rotation);
+  ctx.lineTo(Math.round(base[0] + rX), Math.round(base[1] + rY));
+
+}
+
+const drawBezier = (ctx, base, startPosition, path, scale, rotationPoint, rotation) => {
+  const [x0, y0] = [
+    startPosition[0] + path.coords[0] * scale,
+    startPosition[1] + path.coords[1] * scale,
+  ];
+  const [rX0, rY0] = rotatePoint(x0, y0, ...rotationPoint, rotation);
+  const [x1, y1] = [
+    startPosition[0] + path.coords[2] * scale,
+    startPosition[1] + path.coords[3] * scale,
+  ];
+  const [rX1, rY1] = rotatePoint(x1, y1, ...rotationPoint, rotation);
+  const [x2, y2] = [
+    startPosition[0] + path.coords[4] * scale,
+    startPosition[1] + path.coords[5] * scale,
+  ];
+  const [rX2, rY2] = rotatePoint(x2, y2, ...rotationPoint, rotation);
+  ctx.bezierCurveTo(
+    base[0] + rX0,
+    base[1] + rY0,
+    base[0] + rX1,
+    base[1] + rY1,
+    Math.round(base[0] + rX2),
+    Math.round(base[1] + rY2)
+  );
+}
+
+const drawCircle = (ctx, base, startPosition, path, scale, rotationPoint, rotation) => {
+  const [x0, y0] = [
+    startPosition[0] + path.coords[0] * scale,
+    startPosition[1] + path.coords[1] * scale,
+  ];
+  const [rX0, rY0] = rotatePoint(x0, y0, ...rotationPoint, rotation);
+  const r = path.coords[2] * scale;
+  ctx.arc(
+    Math.round(base[0] + rX0),
+    Math.round(base[1] + rY0),
+    r,
+    path.coords[3],
+    path.coords[4]
+  );
+}
+
 export const drawOnCanvas = (
   ctx,
   startPosition,
@@ -20,7 +72,9 @@ export const drawOnCanvas = (
   scale = 50
 ) => {
   ctx.fillStyle = color;
+
   const base = [0, 0];
+  
   const rotationPoint = [
     startPosition[0] + path.center[0] * scale,
     startPosition[1] + path.center[1] * scale,
@@ -36,52 +90,13 @@ export const drawOnCanvas = (
   ctx.moveTo(base[0] + rotatedStart[0], base[1] + rotatedStart[1]);
   path.paths.forEach((path) => {
     if (path.type === "line") {
-      const [x, y] = [
-        startPosition[0] + path.coords[0] * scale,
-        startPosition[1] + path.coords[1] * scale,
-      ];
-      const [rX, rY] = rotatePoint(x, y, ...rotationPoint, rotation);
-      ctx.lineTo(Math.round(base[0] + rX), Math.round(base[1] + rY));
+      drawLine(ctx, base, startPosition, path, scale, rotationPoint, rotation)
     }
     if (path.type === "arc") {
-      const [x0, y0] = [
-        startPosition[0] + path.coords[0] * scale,
-        startPosition[1] + path.coords[1] * scale,
-      ];
-      const [rX0, rY0] = rotatePoint(x0, y0, ...rotationPoint, rotation);
-      const [x1, y1] = [
-        startPosition[0] + path.coords[2] * scale,
-        startPosition[1] + path.coords[3] * scale,
-      ];
-      const [rX1, rY1] = rotatePoint(x1, y1, ...rotationPoint, rotation);
-      const [x2, y2] = [
-        startPosition[0] + path.coords[4] * scale,
-        startPosition[1] + path.coords[5] * scale,
-      ];
-      const [rX2, rY2] = rotatePoint(x2, y2, ...rotationPoint, rotation);
-      ctx.bezierCurveTo(
-        base[0] + rX0,
-        base[1] + rY0,
-        base[0] + rX1,
-        base[1] + rY1,
-        Math.round(base[0] + rX2),
-        Math.round(base[1] + rY2)
-      );
+      drawBezier(ctx, base, startPosition, path, scale, rotationPoint, rotation)
     }
     if (path.type === "circle") {
-      const [x0, y0] = [
-        startPosition[0] + path.coords[0] * scale,
-        startPosition[1] + path.coords[1] * scale,
-      ];
-      const [rX0, rY0] = rotatePoint(x0, y0, ...rotationPoint, rotation);
-      const r = path.coords[2] * scale;
-      ctx.arc(
-        Math.round(base[0] + rX0),
-        Math.round(base[1] + rY0),
-        r,
-        path.coords[3],
-        path.coords[4]
-      );
+      drawCircle(ctx, base, startPosition, path, scale, rotationPoint, rotation)
     }
   });
   ctx.fill();

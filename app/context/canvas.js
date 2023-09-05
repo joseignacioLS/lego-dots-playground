@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { colors } from "../data/data";
-import { coordsToPosition } from "../utils/space";
+import { calculateGap, coordsToPosition } from "../utils/space";
 import { MouseContext } from "./mouse";
 import { getDrawnSize } from "../utils/canvas";
 import { loadFile, saveToFile } from "../utils/file";
@@ -16,6 +16,7 @@ export const CanvasContextProvider = ({ children }) => {
   const [dots, setDots] = useState([]);
   const [selectedDots, setSelectedDots] = useState([]);
   const [dotSize, setDotSize] = useState(36);
+  const [gap, setGap] = useState(0);
   const [color, setColor] = useState(colors[0]);
   const [rotation, setRotation] = useState(0);
   const [template, setTemplate] = useState(undefined);
@@ -54,9 +55,7 @@ export const CanvasContextProvider = ({ children }) => {
   };
 
   const removeSelectedDots = () => {
-    setDots((oldValue) => {
-      return oldValue.filter((dot, i) => !selectedDots.includes(i));
-    });
+    removeDot(selectedDots)
     setSelectedDots([]);
   };
 
@@ -74,8 +73,7 @@ export const CanvasContextProvider = ({ children }) => {
     if (dotArr === undefined) return setSelectedDots([]);
     dotArr.forEach((dot) => {
       setSelectedDots((oldValue) => {
-        if (oldValue.includes(dot)) return oldValue.filter((d) => d !== dot);
-        return [...oldValue, dot];
+        return oldValue.includes(dot) ? oldValue.filter((d) => d !== dot) : [...oldValue, dot];
       });
     });
   };
@@ -100,12 +98,11 @@ export const CanvasContextProvider = ({ children }) => {
   const updateColor = (value) => {
     setColor(value);
     setDots((oldValue) => {
-      return oldValue.map((dot, i) => {
-        if (selectedDots.includes(i)) {
-          dot.color = value;
-        }
-        return dot;
-      });
+      const newValue = [...oldValue];
+      selectedDots.forEach((i) => {
+        newValue[i].color = value;
+      })
+      return newValue
     });
     toggleSelected(undefined);
   };
@@ -130,7 +127,6 @@ export const CanvasContextProvider = ({ children }) => {
   };
 
   const generateCollisionGrid = (position, collisionMatrix) => {
-
     const grid = [...new Array(200)].map((_) =>
       [...new Array(200)].map((_) => [])
     );
@@ -151,12 +147,12 @@ export const CanvasContextProvider = ({ children }) => {
     }
     return grid
   }
+
   const checkCollisions = ({ position, collisionMatrix }) => {
     const collisions = [];
     const grid = generateCollisionGrid(position, collisionMatrix)
 
-    for (let n = 0; n < dots.length; n++) {
-      const dot = dots[n];
+    dots.forEach((dot, n) => {
       const collisionMatrix = dot.dot.collision[dot.rotation];
 
       for (let i = 0; i < collisionMatrix.length; i++) {
@@ -175,7 +171,7 @@ export const CanvasContextProvider = ({ children }) => {
           }
         }
       }
-    }
+    })
     return collisions;
   };
 
@@ -240,6 +236,19 @@ export const CanvasContextProvider = ({ children }) => {
     cleanDrag();
   };
 
+
+  const calculateHighResSize = (canvasBaseSize) => {
+    const columns = limits.maxX - limits.minX + 1;
+    const rows = limits.maxY - limits.minY + 1;
+    const res = printMode ? canvasBaseSize / Math.max(columns, rows) : dotSize;
+
+    const highResSize = [
+      (res + calculateGap(res)) * columns,
+      (res + calculateGap(res)) * rows,
+    ];
+    return { highResSize, res, columns, rows };
+  };
+
   useEffect(() => {
     if (printMode) setSelectedDots([]);
   }, []);
@@ -284,6 +293,10 @@ export const CanvasContextProvider = ({ children }) => {
     };
   }, [selectedDots, dots, dotSize, mousePosition]);
 
+  useEffect(() => {
+    setGap(calculateGap(dotSize))
+  }, [dotSize])
+
   return (
     <CanvasContext.Provider
       value={{
@@ -303,6 +316,7 @@ export const CanvasContextProvider = ({ children }) => {
         rotateDot,
         dotSize,
         handleDotSizeChange,
+        gap,
         template,
         setTemplate,
         printMode,
@@ -314,7 +328,7 @@ export const CanvasContextProvider = ({ children }) => {
         updateLimits,
         dragSelect,
         background,
-        setBackground
+        setBackground, calculateHighResSize
       }}
     >
       {children}

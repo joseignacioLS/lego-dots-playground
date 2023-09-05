@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import styles from "./Canvas.module.scss";
 import { angles, square } from "../data/dots";
 import {
-  calculateGap,
   coordsToPosition,
   positionToCoords,
 } from "../utils/space";
@@ -25,6 +24,7 @@ const Canvas = ({}) => {
     template,
     dots,
     dotSize,
+    gap,
     placeDot,
     color,
     rotation,
@@ -35,6 +35,7 @@ const Canvas = ({}) => {
     checkCollisions,
     limits,
     dragSelect,
+    calculateHighResSize,
   } = useContext(CanvasContext);
 
   const {
@@ -50,6 +51,7 @@ const Canvas = ({}) => {
     canvasBaseSize,
     canvasBaseSize,
   ]);
+
   const [isCollision, setIsCollision] = useState([]);
   const [images, setImages] = useState([]);
 
@@ -92,23 +94,12 @@ const Canvas = ({}) => {
     updateMousePosition(e, canvasref, dotSize);
   };
 
-  const calculateHighResSize = () => {
-    const columns = limits.maxX - limits.minX + 1;
-    const rows = limits.maxY - limits.minY + 1;
-    const res = printMode ? canvasBaseSize / Math.max(columns, rows) : dotSize;
-
-    const highResSize = [
-      (res + calculateGap(res)) * columns,
-      (res + calculateGap(res)) * rows,
-    ];
-    return { highResSize, res, columns, rows };
-  };
-
   const updateCanvas = () => {
     if (!ctx) return;
     cleanCanvas(ctx);
 
-    const { highResSize, res, columns, rows } = calculateHighResSize();
+    const { highResSize, res, columns, rows } =
+      calculateHighResSize(canvasBaseSize);
 
     if (printMode) {
       if (background) {
@@ -169,7 +160,6 @@ const Canvas = ({}) => {
   };
 
   const drawGrid = () => {
-    const gap = calculateGap(dotSize);
     for (let i = limits.minY; i <= limits.maxY; i++) {
       for (let j = limits.minX; j <= limits.maxX; j++) {
         const x = j * (dotSize + gap);
@@ -217,7 +207,7 @@ const Canvas = ({}) => {
   useEffect(() => {
     if (!ctx) return;
     updateCanvas();
-  }, [ctx, canvasSize, limits, dotSize, dots]);
+  }, [ctx, canvasSize, limits, dotSize, dots, gap]);
 
   useEffect(() => {
     if (template) toggleSelected(undefined);
@@ -226,7 +216,7 @@ const Canvas = ({}) => {
 
   useEffect(() => {
     if (printMode) {
-      const { highResSize } = calculateHighResSize();
+      const { highResSize } = calculateHighResSize(canvasBaseSize);
       cleanCanvas(ctx);
       setCanvasSize(highResSize);
     } else {
