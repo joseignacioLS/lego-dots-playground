@@ -1,10 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import styles from "./Canvas.module.scss";
 import { angles, square } from "../data/dots";
-import {
-  coordsToPosition,
-  positionToCoords,
-} from "../utils/space";
+import { coordsToPosition, positionToCoords } from "../utils/space";
 import {
   cleanCanvas,
   drawImageOnCanvas,
@@ -173,9 +170,13 @@ const Canvas = ({}) => {
     dots.forEach((dot, i) => {
       if (printMode && dot.position[0] - dot.dot.size[0] > limits.maxX) return;
       if (printMode && dot.position[1] - dot.dot.size[1] > limits.maxY) return;
+      const pos = [
+        printMode ? dot.position[0] - limits.minX : dot.position[0],
+        printMode ? dot.position[1] - limits.minY : dot.position[1],
+      ];
       drawOnCanvas(
         ctx,
-        positionToCoords(...dot.position, res),
+        positionToCoords(...pos, res),
         dot.dot,
         angles[dot.rotation],
         selectedDots.includes(i) && !printMode ? "#FF0" : dot.color,
