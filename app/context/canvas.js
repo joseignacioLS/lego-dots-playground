@@ -10,7 +10,6 @@ import { loadFile, saveToFile } from "../utils/file";
 export const CanvasContext = createContext(null);
 
 export const CanvasContextProvider = ({ children }) => {
-
   const { mousePosition, mouseDrag, cleanDrag } = useContext(MouseContext);
 
   const [dots, setDots] = useState([]);
@@ -22,6 +21,7 @@ export const CanvasContextProvider = ({ children }) => {
   const [template, setTemplate] = useState(undefined);
   const [printMode, setPrintMode] = useState(false);
   const [background, setBackground] = useState(true);
+  const [imageFilter, setImageFilter] = useState(true);
   const [limits, setLimits] = useState({
     minX: 0,
     maxX: 8,
@@ -36,7 +36,6 @@ export const CanvasContextProvider = ({ children }) => {
       return { ...oldValue, [key]: oldValue[key] + delta };
     });
   };
-
 
   const addDot = (dot) => {
     setDots((oldValue) => [...oldValue, dot]);
@@ -55,7 +54,7 @@ export const CanvasContextProvider = ({ children }) => {
   };
 
   const removeSelectedDots = () => {
-    removeDot(selectedDots)
+    removeDot(selectedDots);
     setSelectedDots([]);
   };
 
@@ -73,7 +72,9 @@ export const CanvasContextProvider = ({ children }) => {
     if (dotArr === undefined) return setSelectedDots([]);
     dotArr.forEach((dot) => {
       setSelectedDots((oldValue) => {
-        return oldValue.includes(dot) ? oldValue.filter((d) => d !== dot) : [...oldValue, dot];
+        return oldValue.includes(dot)
+          ? oldValue.filter((d) => d !== dot)
+          : [...oldValue, dot];
       });
     });
   };
@@ -87,12 +88,12 @@ export const CanvasContextProvider = ({ children }) => {
   };
 
   const loadGrid = () => {
-    const callback = (dots => dots.forEach(dot => addDot(dot)))
-    loadFile("#file", callback)
+    const callback = (dots) => dots.forEach((dot) => addDot(dot));
+    loadFile("#file", callback);
   };
 
   const exportGrid = () => {
-    saveToFile("design.json", dots)
+    saveToFile("design.json", dots);
   };
 
   const updateColor = (value) => {
@@ -101,8 +102,8 @@ export const CanvasContextProvider = ({ children }) => {
       const newValue = [...oldValue];
       selectedDots.forEach((i) => {
         newValue[i].color = value;
-      })
-      return newValue
+      });
+      return newValue;
     });
     toggleSelected(undefined);
   };
@@ -145,12 +146,12 @@ export const CanvasContextProvider = ({ children }) => {
         ] = collisionMatrix[i][j];
       }
     }
-    return grid
-  }
+    return grid;
+  };
 
   const checkCollisions = ({ position, collisionMatrix }) => {
     const collisions = [];
-    const grid = generateCollisionGrid(position, collisionMatrix)
+    const grid = generateCollisionGrid(position, collisionMatrix);
 
     dots.forEach((dot, n) => {
       const collisionMatrix = dot.dot.collision[dot.rotation];
@@ -163,15 +164,17 @@ export const CanvasContextProvider = ({ children }) => {
           const x =
             j + dot.position[0] - Math.floor(collisionMatrix[0].length / 2);
           if (y < 0 || y >= grid.length || x < 0 || x >= grid.length) continue;
-          if (grid[y][x].reduce((acc, curr, k) => {
-            return curr + collisionMatrix[i][j][k] > 1 || acc
-          }, false)) {
+          if (
+            grid[y][x].reduce((acc, curr, k) => {
+              return curr + collisionMatrix[i][j][k] > 1 || acc;
+            }, false)
+          ) {
             if (collisions.includes(n)) continue;
             collisions.push(n);
           }
         }
       }
-    })
+    });
     return collisions;
   };
 
@@ -236,7 +239,6 @@ export const CanvasContextProvider = ({ children }) => {
     cleanDrag();
   };
 
-
   const calculateHighResSize = (canvasBaseSize) => {
     const columns = limits.maxX - limits.minX + 1;
     const rows = limits.maxY - limits.minY + 1;
@@ -294,8 +296,8 @@ export const CanvasContextProvider = ({ children }) => {
   }, [selectedDots, dots, dotSize, mousePosition]);
 
   useEffect(() => {
-    setGap(calculateGap(dotSize))
-  }, [dotSize])
+    setGap(calculateGap(dotSize));
+  }, [dotSize]);
 
   return (
     <CanvasContext.Provider
@@ -328,7 +330,10 @@ export const CanvasContextProvider = ({ children }) => {
         updateLimits,
         dragSelect,
         background,
-        setBackground, calculateHighResSize
+        setBackground,
+        calculateHighResSize,
+        imageFilter,
+        setImageFilter,
       }}
     >
       {children}

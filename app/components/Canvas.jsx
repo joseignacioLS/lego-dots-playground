@@ -33,6 +33,7 @@ const Canvas = ({}) => {
     limits,
     dragSelect,
     calculateHighResSize,
+    imageFilter,
   } = useContext(CanvasContext);
 
   const {
@@ -142,7 +143,7 @@ const Canvas = ({}) => {
       drawRect(ctx, origin, size);
     }
     ctx.filter = "none";
-    if (printMode) {
+    if (printMode && imageFilter) {
       drawImageOnCanvas(
         ctx,
         images[1],
@@ -223,7 +224,7 @@ const Canvas = ({}) => {
     } else {
       resizeListener();
     }
-  }, [printMode, background]);
+  }, [printMode, background, imageFilter]);
 
   useEffect(() => {
     if (!ctx || !mousePosition) return;

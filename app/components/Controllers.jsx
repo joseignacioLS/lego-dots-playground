@@ -26,6 +26,8 @@ const Controllers = ({}) => {
     printMode,
     background,
     setBackground,
+    imageFilter,
+    setImageFilter,
     dotSize,
     exportGrid,
     loadGrid,
@@ -59,14 +61,26 @@ const Controllers = ({}) => {
         ></input>
         Print Mode
       </label>
-      {printMode && <label>
-        <input
-          type="checkbox"
-          checked={background}
-          onChange={(e) => setBackground(e.currentTarget.checked)}
-        ></input>
-        Background
-      </label>}
+      {printMode && (
+        <label>
+          <input
+            type="checkbox"
+            checked={background}
+            onChange={(e) => setBackground(e.currentTarget.checked)}
+          ></input>
+          Background
+        </label>
+      )}
+      {printMode && (
+        <label>
+          <input
+            type="checkbox"
+            checked={imageFilter}
+            onChange={(e) => setImageFilter(e.currentTarget.checked)}
+          ></input>
+          Filter
+        </label>
+      )}
       {!printMode && (
         <>
           <div className={styles.managing}>
