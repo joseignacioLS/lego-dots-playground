@@ -1,5 +1,33 @@
 .canvas {
-  width: 80%;
+  width: 100%;
 
   border: 1px solid black;
+  grid-area: canvas;
+}
+
+.canvasWrapper {
+  margin-top: 2rem;
+  width: 95%;
+  position: relative;
+  aspect-ratio: 1 / 1;
+  .positionBtn {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+
+    &.btnTop {
+      left: 50%;
+    }
+    &.btnRight {
+      top: 50%;
+      left: 100%;
+    }
+    &.btnBottom {
+      top: 100%;
+      left: 50%;
+    }
+    &.btnLeft {
+      top: 50%;
+    }
+  }
 }

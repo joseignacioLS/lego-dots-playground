@@ -205,7 +205,7 @@ export const CanvasContextProvider = ({ children }) => {
     }
   };
 
-  const dragSelect = () => {
+  const dragSelect = (reposition) => {
     if (!mouseDrag[0] || !mouseDrag[1]) return cleanDrag();
     const size = mouseDrag.map((p) => {
       return coordsToPosition(...p, dotSize);
@@ -220,7 +220,7 @@ export const CanvasContextProvider = ({ children }) => {
 
     const dX = limits.maxX - limits.minX;
     const dY = limits.maxY - limits.minY;
-    const position = [limits.minX, limits.minY];
+    const position = [limits.minX - reposition[0], limits.minY - reposition[1]];
     const collisionMatrix = [...new Array(dY * 2 + 1)].map((_, y) => {
       return [...new Array(dX * 2 + 1)].map((_, x) =>
         y >= dY && x >= dX ? [1, 1, 1, 1] : []

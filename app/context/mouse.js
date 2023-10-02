@@ -19,7 +19,7 @@ export const MouseContextProvider = ({ children }) => {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     const position = coordsToPosition(x, y, dotSize);
-    const coords = positionToCoords(...position, dotSize);
+    const coords = positionToCoords(position[0], position[1], dotSize);
     setMousePosition(coords);
   };
 

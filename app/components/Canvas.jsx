@@ -50,6 +50,8 @@ const Canvas = ({}) => {
     canvasBaseSize,
   ]);
 
+  const [reposition, setReposition] = useState([0, 0]);
+
   const [isCollision, setIsCollision] = useState([]);
   const [images, setImages] = useState([]);
 
@@ -57,16 +59,16 @@ const Canvas = ({}) => {
     if (!template && !isDragging) {
       const position = coordsToPosition(...mousePosition, dotSize);
       const collisions = checkCollisions({
-        position,
+        position: [position[0] - reposition[0], position[1] - reposition[1]],
         collisionMatrix: [[[1, 1, 1, 1]]],
       });
       toggleSelected(collisions);
     }
   };
 
-  const handleClickDown = () => {
+  const handleClickDown = (e) => {
     if (!mousePosition) return;
-    setDragOrigin();
+    setDragOrigin(reposition, dotSize);
   };
 
   const handleClickUp = () => {
@@ -74,13 +76,13 @@ const Canvas = ({}) => {
       if (!isDragging) {
         clickSelect();
       } else {
-        dragSelect();
+        dragSelect(reposition);
       }
     } else {
       const position = coordsToPosition(...mousePosition, dotSize);
       placeDot({
         dot: template,
-        position,
+        position: [position[0] - reposition[0], position[1] - reposition[1]],
         color,
         rotation,
       });
@@ -160,8 +162,8 @@ const Canvas = ({}) => {
   const drawGrid = () => {
     for (let i = limits.minY; i <= limits.maxY; i++) {
       for (let j = limits.minX; j <= limits.maxX; j++) {
-        const x = j * (dotSize + gap);
-        const y = i * (dotSize + gap);
+        const x = (j + reposition[0]) * (dotSize + gap);
+        const y = (i + reposition[1]) * (dotSize + gap);
         drawOnCanvas(ctx, [x, y], square, 0, "#DDD", dotSize);
       }
     }
@@ -172,8 +174,12 @@ const Canvas = ({}) => {
       if (printMode && dot.position[0] - dot.dot.size[0] > limits.maxX) return;
       if (printMode && dot.position[1] - dot.dot.size[1] > limits.maxY) return;
       const pos = [
-        printMode ? dot.position[0] - limits.minX : dot.position[0],
-        printMode ? dot.position[1] - limits.minY : dot.position[1],
+        printMode
+          ? dot.position[0] - limits.minX
+          : dot.position[0] + reposition[0],
+        printMode
+          ? dot.position[1] - limits.minY
+          : dot.position[1] + reposition[1],
       ];
       drawOnCanvas(
         ctx,
@@ -248,19 +254,73 @@ const Canvas = ({}) => {
       isCollision.length > 0 ? "#F00" : color,
       dotSize
     );
-  }, [mousePosition, template, color, rotation, selectedDots, canvasSize]);
+  }, [
+    mousePosition,
+    template,
+    color,
+    rotation,
+    selectedDots,
+    canvasSize,
+    reposition,
+  ]);
 
   return (
-    <canvas
-      width={canvasSize[0]}
-      height={canvasSize[1]}
-      ref={canvasref}
-      className={styles.canvas}
-      onMouseMove={handleMouseOver}
-      onMouseDown={handleClickDown}
-      onMouseUp={handleClickUp}
-      onMouseLeave={cleanDrag}
-    ></canvas>
+    <div className={styles.canvasWrapper}>
+      {!printMode && (
+        <>
+          <button
+            className={`${styles.positionBtn} ${styles.btnTop}`}
+            onClick={() => {
+              setReposition((oldValue) => {
+                return [oldValue[0], oldValue[1] + 1];
+              });
+            }}
+          >
+            ·
+          </button>
+          <button
+            className={`${styles.positionBtn} ${styles.btnRight}`}
+            onClick={() => {
+              setReposition((oldValue) => {
+                return [oldValue[0] - 1, oldValue[1]];
+              });
+            }}
+          >
+            ·
+          </button>
+          <button
+            className={`${styles.positionBtn} ${styles.btnBottom}`}
+            onClick={() => {
+              setReposition((oldValue) => {
+                return [oldValue[0], oldValue[1] - 1];
+              });
+            }}
+          >
+            ·
+          </button>
+          <button
+            className={`${styles.positionBtn} ${styles.btnLeft}`}
+            onClick={() => {
+              setReposition((oldValue) => {
+                return [oldValue[0] + 1, oldValue[1]];
+              });
+            }}
+          >
+            ·
+          </button>
+        </>
+      )}
+      <canvas
+        width={canvasSize[0]}
+        height={canvasSize[1]}
+        ref={canvasref}
+        className={styles.canvas}
+        onMouseMove={handleMouseOver}
+        onMouseDown={handleClickDown}
+        onMouseUp={handleClickUp}
+        onMouseLeave={cleanDrag}
+      ></canvas>
+    </div>
   );
 };
 
