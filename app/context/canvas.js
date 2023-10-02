@@ -138,7 +138,7 @@ export const CanvasContextProvider = ({ children }) => {
         const y = i + position[1] - Math.floor(collisionMatrix.length / 2);
         const x = j + position[0] - Math.floor(collisionMatrix[0].length / 2);
         if (y < 0 || y >= grid.length || x < 0 || x >= grid[0].length) {
-          collisions.push(Infinity);
+          //collisions.push(Infinity);
           continue;
         }
         grid[i + position[1] - Math.floor(collisionMatrix.length / 2)][
