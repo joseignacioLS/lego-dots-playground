@@ -88,8 +88,9 @@ const Controllers = ({}) => {
               Dot Size
               <Dial
                 value={dotSize}
-                leftBtnAction={() => handleDotSizeChange(dotSize - 4)}
-                rightBtnAction={() => handleDotSizeChange(dotSize + 4)}
+                leftBtnAction={() => handleDotSizeChange(dotSize - 1)}
+                rightBtnAction={() => handleDotSizeChange(dotSize + 1)}
+                onChange={(v) => handleDotSizeChange(v)}
               ></Dial>
             </label>
             <div className={styles.oneLine}>
@@ -99,6 +100,7 @@ const Controllers = ({}) => {
                   value={limits.minX}
                   leftBtnAction={() => updateLimits("minX", -1)}
                   rightBtnAction={() => updateLimits("minX", 1)}
+                  onChange={(v) => updateLimits("minX", v, true)}
                 ></Dial>
               </label>
               <label className={styles.labelAndButtons}>
@@ -107,6 +109,7 @@ const Controllers = ({}) => {
                   value={limits.maxX}
                   leftBtnAction={() => updateLimits("maxX", -1)}
                   rightBtnAction={() => updateLimits("maxX", 1)}
+                  onChange={(v) => updateLimits("maxX", v, true)}
                 ></Dial>
               </label>
             </div>
@@ -117,6 +120,7 @@ const Controllers = ({}) => {
                   value={limits.minY}
                   leftBtnAction={() => updateLimits("minY", -1)}
                   rightBtnAction={() => updateLimits("minY", 1)}
+                  onChange={(v) => updateLimits("minY", v, true)}
                 ></Dial>
               </label>
               <label className={styles.labelAndButtons}>
@@ -125,6 +129,7 @@ const Controllers = ({}) => {
                   value={limits.maxY}
                   leftBtnAction={() => updateLimits("maxY", -1)}
                   rightBtnAction={() => updateLimits("maxY", 1)}
+                  onChange={(v) => updateLimits("maxY", v, true)}
                 ></Dial>
               </label>
             </div>

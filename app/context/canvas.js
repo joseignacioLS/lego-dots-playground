@@ -29,8 +29,16 @@ export const CanvasContextProvider = ({ children }) => {
     maxY: 8,
   });
 
-  const updateLimits = (key, delta) => {
+  const updateLimits = (key, delta, absolute = false) => {
     if (!(key in limits)) return;
+
+    if (absolute) {
+
+      setLimits((oldValue) => {
+        return { ...oldValue, [key]: delta };
+      });
+      return
+    }
 
     setLimits((oldValue) => {
       return { ...oldValue, [key]: oldValue[key] + delta };
@@ -88,12 +96,24 @@ export const CanvasContextProvider = ({ children }) => {
   };
 
   const loadGrid = () => {
-    const callback = (dots) => dots.forEach((dot) => addDot(dot));
+    const callback = (dots) => dots.forEach((dot) => {
+      if (dot.config) {
+        setDotSize(dot.dotSize)
+        setLimits(dot.limits)
+      }
+      else {
+        addDot(dot)
+      }
+    });
     loadFile("#file", callback);
   };
 
   const exportGrid = () => {
-    saveToFile("design.json", dots);
+    saveToFile("design.json", [...dots, {
+      config: true,
+      dotSize,
+      limits
+    }]);
   };
 
   const updateColor = (value) => {
@@ -256,7 +276,6 @@ export const CanvasContextProvider = ({ children }) => {
   }, []);
 
   const generateListeners = (e) => {
-    e.preventDefault();
     if (e.key === "q") {
       removeSelectedDots();
     } else if (e.key === "r") {

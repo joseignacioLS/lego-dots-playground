@@ -11,7 +11,7 @@ import {
 import { CanvasContext } from "../context/canvas";
 import { MouseContext } from "../context/mouse";
 
-const canvasBaseSize = 2048;
+const canvasBaseSize = 4096;
 
 const Canvas = ({}) => {
   const canvasref = useRef();

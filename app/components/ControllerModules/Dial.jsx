@@ -1,19 +1,24 @@
 import React from "react";
+import styles from "./dial.module.scss";
 
-const Dial = ({ value, leftBtnAction, rightBtnAction }) => {
+const Dial = ({
+  value,
+  leftBtnAction,
+  rightBtnAction,
+  onChange = () => {},
+}) => {
   return (
     <div>
       <button onClick={leftBtnAction}>-</button>
-      <span
-        style={{
-          display: "inline-block",
-          width: "2rem",
-          margin: "0 .5rem",
-          textAlign: "center",
+      <input
+        className={styles.input}
+        value={value}
+        onInput={(e) => {
+          const value = e.currentTarget.value;
+          if (!value.match(/^\-?[0-9]+$/)) return;
+          onChange(+value);
         }}
-      >
-        {value}
-      </span>
+      />
 
       <button onClick={rightBtnAction}>+</button>
     </div>
